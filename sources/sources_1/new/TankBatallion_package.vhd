@@ -52,6 +52,18 @@ package tank_batallion_defs is
         );
     end component LS74273;
 
+
+    component LS74139 is
+        Port (
+            oe_n   : in std_logic;
+            sel    : in std_logic_vector(1 downto 0);
+            y0     : out std_logic;
+            y1     : out std_logic;
+            y2     : out std_logic;
+            y3     : out std_logic
+        );
+    end component LS74139;
+
     component  M2716 is
         port(
             clk  : in  std_logic;

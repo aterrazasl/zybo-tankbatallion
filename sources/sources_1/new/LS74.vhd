@@ -130,6 +130,47 @@ end Behavioral;
 
 
 
+--Implementation of 74LS139
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74139 is
+    Port (
+        oe_n   : in std_logic;
+        sel    : in std_logic_vector(1 downto 0);
+        y0     : out std_logic;
+        y1     : out std_logic;
+        y2     : out std_logic;
+        y3     : out std_logic
+    );
+end LS74139;
+
+architecture Behavioral of LS74139 is
+    signal temp : std_logic_vector (3 downto 0);
+begin
+
+    y0 <= temp(0) when oe_n='0' else '1';
+    y1 <= temp(1) when oe_n='0' else '1';
+    y2 <= temp(2) when oe_n='0' else '1';
+    y3 <= temp(3) when oe_n='0' else '1';
+
+
+    with sel select
+ temp <= "1101" when "01",
+         "1011" when "10",
+         "0111" when "11",
+         "1110" when others;
+
+end Behavioral;
+
+
 
 
 
