@@ -122,7 +122,7 @@ begin
 		begin
 		
         ---- Testing binary_read
-        ROM_TESTING: process
+        DECODER_TESTING: process
 			begin
             wait for 1000 ns;
             oe_n <= '1';
@@ -152,5 +152,36 @@ begin
 		);
 	end block TEST_DECODER;
 	
+	
+	    TEST_SHIFTER :block
+		
+		signal  shift_load, qh   : std_logic;
+		signal  d    : std_logic_vector(7 downto 0);
+		
+		begin
+		
+        ---- Testing binary_read
+        SHIFTER_TESTING: process
+			begin
+            wait for 1000 ns;
+            d <= x"AD";
+            wait until falling_edge (clock);
+            shift_load <= '0';
+            wait until falling_edge (clock);
+            shift_load <= '1';
+            wait;
+		end process;
+		
+        LS74166_module : component  LS74166
+        Port map (
+            clr_n           => not (i_reset),
+            clk             => clock,
+            clk_dis         => '0',
+            serial          => '0',
+            shift_load      => shift_load,
+            d               => d,
+            qh              => qh
+        );
+	end block TEST_SHIFTER;
 	
 end Behavioral;

@@ -130,6 +130,44 @@ end Behavioral;
 
 
 
+
+--Implementation of 74LS174
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74174 is
+    Port (
+        clr_n   : in std_logic;
+        clk     : in std_logic;
+        d       : in std_logic_vector(5 downto 0);
+        q       : out std_logic_vector(5 downto 0)
+    );
+end LS74174;
+
+architecture Behavioral of LS74174 is
+    signal q_temp : std_logic_vector(5 downto 0);
+begin
+
+    q   <=     q_temp;
+
+    process (clk,clr_n )
+    begin
+        if (clr_n ='0') then
+            q_temp <= "000000";
+        elsif (rising_edge (clk) ) then
+            q_temp <= d;
+        end if;
+    end process;
+end Behavioral;
+
+
 --Implementation of 74LS139
 --.
 --.
@@ -164,15 +202,60 @@ begin
 
     with sel select
  temp <= "1101" when "01",
-         "1011" when "10",
-         "0111" when "11",
-         "1110" when others;
+        "1011" when "10",
+        "0111" when "11",
+        "1110" when others;
 
 end Behavioral;
 
 
 
+--Implementation of 74LS166
+--.
+--.
+--.
+--.
 
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74166 is
+    Port (
+        clr_n           : in std_logic;
+        clk             : in std_logic;
+        clk_dis          : in std_logic;
+        serial          : in std_logic;
+        shift_load      : in std_logic;
+        d               : in std_logic_vector(7 downto 0);
+        qh              : out std_logic
+    );
+end LS74166;
+
+architecture Behavioral of LS74166 is
+    signal q_temp : std_logic_vector(7 downto 0);
+begin
+
+    qh   <=     q_temp(7);
+
+    process (clk,clr_n, shift_load )
+    begin
+        if (clr_n ='0') then
+            q_temp <= x"00";
+        elsif (rising_edge (clk) ) then
+
+            if(clk_dis ='0' and shift_load ='0') then
+                q_temp <= d;
+            elsif (clk_dis ='0' and shift_load ='1') then
+                q_temp <= q_temp (6 downto 0) & serial;
+            else
+                q_temp <= q_temp;
+
+            end if;
+        end if;
+    end process;
+end Behavioral;
 
 
 
