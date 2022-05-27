@@ -96,6 +96,16 @@ package tank_batallion_defs is
         );
     end component M2716;
 
+    component IC7052 is
+        port(
+            clk  : in  std_logic;
+            oe_n   : in  std_logic;
+            ce_n   : in  std_logic;
+            addr : in  std_logic_vector(7 downto 0);
+            data : out std_logic_vector(3 downto 0)
+        );
+    end component IC7052;
+
 
     component TimingSync is
         Port (
