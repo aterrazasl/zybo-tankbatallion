@@ -88,3 +88,8 @@
 #batch files
 #########
 !*.bat
+#########
+#auto generated files 
+#########
+TankBatallion
+vivado.jou
