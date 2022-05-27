@@ -77,7 +77,7 @@ begin
             clk       => clk,
             enp      => q_loop,
             ent        =>q_loop,
-            data_input  => "01000000",
+            data_input  => x"40", --"01000000",
             data_output => data_count,
             rco        => rco
         );
@@ -109,7 +109,7 @@ begin
             clk       => ic74ls74_5A_2_q_n,
             enp      => ic74ls74_5D_1_q,
             ent        =>ic74ls74_5D_1_q,
-            data_input  => "01111100",
+            data_input  => x"7c", --"01111100",
             data_output => data_count2,
             rco        => ic74ls161_6D_1_rco
         );

@@ -41,6 +41,28 @@ package tank_batallion_defs is
         );
     end component LS7474;
 
+
+
+    component LS74273 is
+        Port (
+            clr_n   : in std_logic;
+            clk     : in std_logic;
+            d       : in std_logic_vector(7 downto 0);
+            q       : out std_logic_vector(7 downto 0)
+        );
+    end component LS74273;
+
+    component  M2716 is
+        port(
+            clk  : in  std_logic;
+            oe_n   : in  std_logic;
+            ce_n   : in  std_logic;
+            addr : in  std_logic_vector(10 downto 0);
+            data : out std_logic_vector(7 downto 0)
+        );
+    end component M2716;
+
+
     component TimingSync is
         Port (
             clk       : in std_logic;
@@ -63,7 +85,7 @@ package tank_batallion_defs is
         );
     end component TankBatallion_top;
 
--- Clock generation for 32Mhz scandoubler and 6Mhz for TankBatallion 
+    -- Clock generation for 32Mhz scandoubler and 6Mhz for TankBatallion 
     component clk_wiz_1
         port (
             clk_out1 : out std_logic;
@@ -71,14 +93,14 @@ package tank_batallion_defs is
             clk_in1  : in  std_logic
         );
     end component clk_wiz_1;
-    
-    
---    component clk_wiz_0
---        port (
---            clk_out1 : out std_logic;
---            clk_in1  : in  std_logic
---        );
---    end component clk_wiz_0;    
+
+
+    --    component clk_wiz_0
+    --        port (
+    --            clk_out1 : out std_logic;
+    --            clk_in1  : in  std_logic
+    --        );
+    --    end component clk_wiz_0;    
 
     component scandoubler
         port (
@@ -94,7 +116,7 @@ package tank_batallion_defs is
             g_out     : out std_logic_vector (5 downto 0);
             b_out     : out std_logic_vector (5 downto 0)
         );
-    end component scandoubler;    
+    end component scandoubler;
 
 end package tank_batallion_defs;
 

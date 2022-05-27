@@ -26,6 +26,8 @@ architecture Behavioral of TankBatallion_top is
 
     signal red, green, blue : std_logic ;
 
+    signal rom_addr : std_logic_vector (10 downto 0);
+    signal rom_data : std_logic_vector (7 downto 0);
 
 
 begin
@@ -62,5 +64,19 @@ clock <= i_clock ;
     VGAports.red    <= red & red & red & red & red;
     VGAports.green  <= green & green & green & green & green & green;
     VGAports.blue   <= blue & blue & blue  & blue  & blue;
+    
+    
+    
+    
+---- Testing binary_read
+
+    ROM2716 : component  M2716 
+        port map (
+            clk    => clock,
+            oe_n   => '0',
+            ce_n   => '0',
+            addr   => rom_addr,
+            data   => rom_data
+        );  
 
 end Behavioral;

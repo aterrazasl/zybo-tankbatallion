@@ -91,6 +91,41 @@ end Behavioral;
 
 
 
+--Implementation of 74LS273
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74273 is
+    Port (
+        clr_n   : in std_logic;
+        clk     : in std_logic;
+        d       : in std_logic_vector(7 downto 0);
+        q       : out std_logic_vector(7 downto 0)
+    );
+end LS74273;
+
+architecture Behavioral of LS74273 is
+    signal q_temp : std_logic_vector(7 downto 0);
+begin
+
+    q   <=     q_temp;
+
+    process (clk,clr_n )
+    begin
+        if (clr_n ='0') then
+            q_temp <= x"00";
+        elsif (rising_edge (clk) ) then
+            q_temp <= d;
+        end if;
+    end process;
+end Behavioral;
 
 
 
