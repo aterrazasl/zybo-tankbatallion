@@ -10,9 +10,10 @@ entity TankBatallion_VGA_Top is
     port (
         i_reset      : in   std_logic;
         i_clock      : in  std_logic;   -- 125Mhz input clock from L16
-        i_enable     : in  std_logic;
+        i_switch_0   : in  std_logic;
         i_switch_1   : in  std_logic;
         i_switch_2   : in  std_logic;
+        i_switch_3   : in std_logic ;
         o_led_drive  : out std_logic;
         clock_enable : out std_logic;
         led1         : out std_logic;
@@ -44,7 +45,8 @@ begin
             i_reset     => i_reset,
             i_clock     => clock_6,
             i_clock32M  => clock_32 ,
-            VGAports    => VGA
+            VGAports    => VGA,
+            fixed_tile  => i_switch_2 & i_switch_1 & i_switch_0
         );
 
     Scandoubler_mod : component scandoubler
@@ -62,11 +64,11 @@ begin
             b_out       => b    
         );
 
-VGAports.h_sync     <= VGA2.h_sync    when i_switch_1 = '1' else VGA.h_sync; 
-VGAports.v_sync     <= VGA2.v_sync    when i_switch_1 = '1' else VGA.v_sync; 
-VGAports.red        <= r(4 downto 0)  when i_switch_1 = '1' else VGA.red;
-VGAports.green      <= VGA2.green     when i_switch_1 = '1' else VGA.green;  
-VGAports.blue       <= b(4 downto 0)  when i_switch_1 = '1' else VGA.blue;
+VGAports.h_sync     <= VGA2.h_sync    when i_switch_3 = '1' else VGA.h_sync; 
+VGAports.v_sync     <= VGA2.v_sync    when i_switch_3 = '1' else VGA.v_sync; 
+VGAports.red        <= r(4 downto 0)  when i_switch_3 = '1' else VGA.red;
+VGAports.green      <= VGA2.green     when i_switch_3 = '1' else VGA.green;  
+VGAports.blue       <= b(4 downto 0)  when i_switch_3 = '1' else VGA.blue;
 
 
 end Behavioral;

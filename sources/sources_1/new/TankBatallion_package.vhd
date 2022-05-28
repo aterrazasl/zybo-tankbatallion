@@ -132,7 +132,8 @@ package tank_batallion_defs is
             i_reset      : in   std_logic;
             i_clock      : in  std_logic;   -- 125Mhz input clock from L16
             i_clock32M   : in std_logic ;
-            VGAports     : out VGA_output_ports
+            VGAports     : out VGA_output_ports;
+            fixed_tile   : in std_logic_vector (2 downto 0)
         );
     end component TankBatallion_top;
 
