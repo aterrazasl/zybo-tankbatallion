@@ -68,7 +68,8 @@ begin
             i_reset     => i_reset,
             i_clock     => clock,
             i_clock32M  => clock_32M,
-            VGAports    => VGA_out 
+            VGAports    => VGA_out,
+            fixed_tile  => x"CE" 
         );
 
 
