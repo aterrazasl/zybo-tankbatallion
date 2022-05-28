@@ -5,7 +5,9 @@ use IEEE.NUMERIC_STD.ALL;
 -- Package Declaration Section
 package tank_batallion_defs is
 
-    constant ClockPeriod : TIME := 166.66666666 ns; --333 ns;
+    constant ClockPeriod_3M  : TIME := 333 ns;
+    constant ClockPeriod_6M  : TIME := 166.66666666 ns; --333 ns;
+    constant ClockPeriod_32M : TIME := 31.25 ns; 
 
     type VGA_output_ports is record
         h_sync			: std_logic;
@@ -115,6 +117,10 @@ package tank_batallion_defs is
             vsync     : out std_logic;
             compsync  : out std_logic;
             vblank    : out std_logic;
+            h1_out    : out std_logic;
+            v1_out    : out std_logic;
+            h256_out    : out std_logic;
+            h256_ast_out    : out std_logic;
             low_count : out std_logic_vector (7 downto 0);
             high_count: out std_logic_vector (7 downto 0)
         );
@@ -125,6 +131,7 @@ package tank_batallion_defs is
         port (
             i_reset      : in   std_logic;
             i_clock      : in  std_logic;   -- 125Mhz input clock from L16
+            i_clock32M   : in std_logic ;
             VGAports     : out VGA_output_ports
         );
     end component TankBatallion_top;

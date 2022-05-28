@@ -43,6 +43,7 @@ begin
         port map (
             i_reset     => i_reset,
             i_clock     => clock_6,
+            i_clock32M  => clock_32 ,
             VGAports    => VGA
         );
 
