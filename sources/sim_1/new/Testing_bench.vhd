@@ -69,7 +69,7 @@ begin
             i_clock     => clock,
             i_clock32M  => clock_32M,
             VGAports    => VGA_out,
-            fixed_tile  => x"CE" 
+            fixed_tile  => "000"
         );
 
 

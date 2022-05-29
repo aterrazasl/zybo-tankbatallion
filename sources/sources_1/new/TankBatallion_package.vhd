@@ -7,7 +7,7 @@ package tank_batallion_defs is
 
     constant ClockPeriod_3M  : TIME := 333 ns;
     constant ClockPeriod_6M  : TIME := 166.66666666 ns; --333 ns;
-    constant ClockPeriod_32M : TIME := 31.25 ns; 
+    constant ClockPeriod_32M : TIME := 31.25 ns;
 
     type VGA_output_ports is record
         h_sync			: std_logic;
@@ -88,6 +88,19 @@ package tank_batallion_defs is
         );
     end component LS74166;
 
+
+
+    component  LS74157 is
+        Port (
+            sel          :  in std_logic;
+            en_n         :  in std_logic;
+            d0           :  in std_logic_vector(3 downto 0);
+            d1           :  in std_logic_vector(3 downto 0);
+            z            : out std_logic_vector(3 downto 0)
+        );
+    end component LS74157;
+
+
     component  M2716 is
         port(
             clk  : in  std_logic;
@@ -97,6 +110,19 @@ package tank_batallion_defs is
             data : out std_logic_vector(7 downto 0)
         );
     end component M2716;
+
+
+    component  M2716_static_frame is
+        port(
+            clk  : in  std_logic;
+            oe_n   : in  std_logic;
+            ce_n   : in  std_logic;
+            addr : in  std_logic_vector(10 downto 0);
+            data : out std_logic_vector(7 downto 0)
+        );
+    end component  M2716_static_frame;
+
+
 
     component IC7052 is
         port(

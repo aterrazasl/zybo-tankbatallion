@@ -261,3 +261,36 @@ end Behavioral;
 
 
 
+--Implementation of 74LS157
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74157 is
+    Port (
+        sel          :  in std_logic;
+        en_n         :  in std_logic;
+        d0           :  in std_logic_vector(3 downto 0);
+        d1           :  in std_logic_vector(3 downto 0);
+        z            : out std_logic_vector(3 downto 0)
+    );
+end LS74157;
+
+architecture Behavioral of LS74157 is
+    signal q_temp : std_logic_vector(3 downto 0);
+begin
+
+    q_temp    <= d0     when  sel = '0' else d1;
+    
+    z         <= q_temp when en_n = '0' else "0000";
+    
+end Behavioral;
+
+
+

@@ -40,10 +40,12 @@ architecture Behavioral of TankBatallion_top is
 
     signal tile, tile_to_display : std_logic_vector (7 downto 0);
 
+    signal rom_addr_static : std_logic_vector (11 downto 0);  
+
 begin
 
 
-tile_to_display <= x"A" & '0' & fixed_tile;
+--tile_to_display <= x"A" & '0' & fixed_tile;
 
 clock <= i_clock ;
 --    CLOCK_6MHZ : clk_wiz_0
@@ -145,6 +147,34 @@ VGAports.red    <= color_data(1) & color_data(1) & color_data(1) & color_data(1)
 
 
 
+
+    ic_static_frame_mux_1 : component  LS74157 
+        Port map(
+            sel          => '1', 
+            en_n         => '1' and  (h256_out) , 
+            d0           => "0000", 
+            d1           => '0' & '0' & data_count2(6) & data_count2(5), 
+            z            => rom_addr_static (11 downto 8) 
+        );
+        
+    ic_static_frame_mux_2 : component  LS74157 
+        Port map(
+            sel          => '1', 
+            en_n         => '1' and  (h256_out) , 
+            d0           => "0000",
+            d1           => data_count2(4) & data_count2(3) &  data_count2(2) & data_count(6), 
+            z            => rom_addr_static (7 downto 4) 
+        );
+
+    ic_static_frame_mux_3 : component  LS74157 
+        Port map(
+            sel          => '1', 
+            en_n         => '0'  , 
+            d0           => "0000", 
+            d1           => data_count(5) & data_count(4) & data_count(3) & data_count(2), 
+            z            => rom_addr_static (3 downto 0) 
+        );        
+
 icStatic_frame: component LS74273 
         Port map(
             clr_n   => not(i_reset ), 
@@ -152,6 +182,16 @@ icStatic_frame: component LS74273
             d       => tile_to_display, 
             q       => tile 
         );
-    
+
+
+    isM2716_static : component  M2716_static_frame 
+        port map(
+            clk    => i_clock32M, 
+            oe_n   => '0' , 
+            ce_n   => '0', 
+            addr   => rom_addr_static(10 downto 0), 
+            data   => tile_to_display
+        );
+
 
 end Behavioral;
