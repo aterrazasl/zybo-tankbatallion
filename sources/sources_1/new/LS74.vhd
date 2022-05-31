@@ -125,7 +125,24 @@ begin
             q_temp <= d;
         end if;
     end process;
+
+    --    process (clk, clr_n )
+    --    begin
+    --        if (clr_n  ='0') then
+    --            q_temp <= x"00";
+    --        elsif  (rising_edge (clk) ) then
+    --            if clk = '1' then
+    --                q <= d;
+    --                q_temp <= d;
+    --            end if;
+
+    --            q <= q_temp;
+    --        end if;
+    --    end process;
+
+
 end Behavioral;
+
 
 
 
@@ -155,16 +172,38 @@ architecture Behavioral of LS74174 is
     signal q_temp : std_logic_vector(5 downto 0);
 begin
 
-    q   <=     q_temp;
+    --q   <=     q_temp2(7 downto 2);
 
-    process (clk,clr_n )
+    process (clk )
     begin
-        if (clr_n ='0') then
-            q_temp <= "000000";
-        elsif (rising_edge (clk) ) then
-            q_temp <= d;
+        if  (rising_edge (clk) ) then
+            if clk = '1' then
+                q <= d;
+                q_temp <= d;
+            else
+                q <= q_temp;
+            end if;
+
+            q <= q_temp;
         end if;
     end process;
+
+
+
+    --        process (clk, clr_n )
+    --    begin
+    --        if (clr_n  ='0') then
+    --            q_temp <= "000000";
+    --        elsif  (rising_edge (clk) ) then
+    --            if clk = '1' then
+    --                q <= d;
+    --                q_temp <= d;
+    --            end if;
+
+    --            q <= q_temp;
+    --        end if;
+    --    end process;
+
 end Behavioral;
 
 
@@ -287,9 +326,9 @@ architecture Behavioral of LS74157 is
 begin
 
     q_temp    <= d0     when  sel = '0' else d1;
-    
+
     z         <= q_temp when en_n = '0' else "0000";
-    
+
 end Behavioral;
 
 

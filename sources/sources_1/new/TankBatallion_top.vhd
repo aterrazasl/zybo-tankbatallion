@@ -45,7 +45,7 @@ architecture Behavioral of TankBatallion_top is
 begin
 
 
---tile_to_display <= x"A" & '0' & fixed_tile;
+--tile <= x"A" & '0' & fixed_tile;
 
 clock <= i_clock ;
 --    CLOCK_6MHZ : clk_wiz_0
@@ -178,7 +178,7 @@ VGAports.red    <= color_data(1) & color_data(1) & color_data(1) & color_data(1)
 icStatic_frame: component LS74273 
         Port map(
             clr_n   => not(i_reset ), 
-            clk     => data_count(1),  --h4
+            clk     => (data_count(1)),  --h4
             d       => tile_to_display, 
             q       => tile 
         );
