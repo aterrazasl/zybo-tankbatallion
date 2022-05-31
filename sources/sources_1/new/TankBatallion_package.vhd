@@ -49,7 +49,8 @@ package tank_batallion_defs is
             clr_n   : in std_logic;
             clk     : in std_logic;
             d       : in std_logic_vector(7 downto 0);
-            q       : out std_logic_vector(7 downto 0)
+            q       : out std_logic_vector(7 downto 0);
+            enable  : in std_logic
         );
     end component LS74273;
 
@@ -59,7 +60,8 @@ package tank_batallion_defs is
             clr_n   : in std_logic;
             clk     : in std_logic;
             d       : in std_logic_vector(5 downto 0);
-            q       : out std_logic_vector(5 downto 0)
+            q       : out std_logic_vector(5 downto 0);
+            enable  : in std_logic
         );
     end component LS74174;
 

@@ -107,42 +107,25 @@ entity LS74273 is
         clr_n   : in std_logic;
         clk     : in std_logic;
         d       : in std_logic_vector(7 downto 0);
-        q       : out std_logic_vector(7 downto 0)
+        q       : out std_logic_vector(7 downto 0);
+        enable  : in std_logic
     );
 end LS74273;
 
 architecture Behavioral of LS74273 is
-    signal q_temp : std_logic_vector(7 downto 0);
 begin
 
-    q   <=     q_temp;
-
-    process (clk,clr_n )
+    process (clr_n, clk) is
     begin
-        if (clr_n ='0') then
-            q_temp <= x"00";
-        elsif (rising_edge (clk) ) then
-            q_temp <= d;
+        if clr_n = '0' then
+            q <= x"00";
+        elsif rising_edge(clk) then
+            if enable = '1' then
+                q <= d;
+            end if;
         end if;
     end process;
-
-    --    process (clk, clr_n )
-    --    begin
-    --        if (clr_n  ='0') then
-    --            q_temp <= x"00";
-    --        elsif  (rising_edge (clk) ) then
-    --            if clk = '1' then
-    --                q <= d;
-    --                q_temp <= d;
-    --            end if;
-
-    --            q <= q_temp;
-    --        end if;
-    --    end process;
-
-
 end Behavioral;
-
 
 
 
@@ -164,7 +147,8 @@ entity LS74174 is
         clr_n   : in std_logic;
         clk     : in std_logic;
         d       : in std_logic_vector(5 downto 0);
-        q       : out std_logic_vector(5 downto 0)
+        q       : out std_logic_vector(5 downto 0);
+        enable  : in std_logic
     );
 end LS74174;
 
@@ -172,37 +156,17 @@ architecture Behavioral of LS74174 is
     signal q_temp : std_logic_vector(5 downto 0);
 begin
 
-    --q   <=     q_temp2(7 downto 2);
 
-    process (clk )
+    process (clr_n, clk) is
     begin
-        if  (rising_edge (clk) ) then
-            if clk = '1' then
+        if clr_n = '0' then
+            q <= "000000";
+        elsif rising_edge(clk) then
+            if enable = '0' then
                 q <= d;
-                q_temp <= d;
-            else
-                q <= q_temp;
             end if;
-
-            q <= q_temp;
         end if;
     end process;
-
-
-
-    --        process (clk, clr_n )
-    --    begin
-    --        if (clr_n  ='0') then
-    --            q_temp <= "000000";
-    --        elsif  (rising_edge (clk) ) then
-    --            if clk = '1' then
-    --                q <= d;
-    --                q_temp <= d;
-    --            end if;
-
-    --            q <= q_temp;
-    --        end if;
-    --    end process;
 
 end Behavioral;
 
@@ -295,6 +259,7 @@ begin
         end if;
     end process;
 end Behavioral;
+
 
 
 

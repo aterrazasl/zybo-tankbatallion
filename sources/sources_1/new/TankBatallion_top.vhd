@@ -40,156 +40,160 @@ architecture Behavioral of TankBatallion_top is
 
     signal tile, tile_to_display : std_logic_vector (7 downto 0);
 
-    signal rom_addr_static : std_logic_vector (11 downto 0);  
+    signal rom_addr_static : std_logic_vector (11 downto 0);
 
 begin
 
 
---tile <= x"A" & '0' & fixed_tile;
+    --tile_to_display <= x"A" & '0' & fixed_tile;
 
-clock <= i_clock ;
---    CLOCK_6MHZ : clk_wiz_0
---        port map (
---            clk_out1 => clock,
---            clk_in1  => i_clock
---        );
-
-
----- Timing sync generation    ---- 
-
-TimingSync_Module: component TimingSync
-    Port map (
-        clk           => clock,
-        clr_n         => not (i_reset),
-        hsync         => h256,
-        vsync         => vsync,
-        compsync      => compsync,
-        vblank        => vblank,
-        h1_out        => h1,
-        v1_out        => v1,
-        h256_out      => h256_out,
-        h256_ast_out  => h256_ast_out,
-        low_count     => data_count,
-        high_count    => data_count2
-    );
-
-VGAports.h_sync  <= h256;
-VGAports.v_sync  <= vsync;
+    clock <= i_clock ;
+    --    CLOCK_6MHZ : clk_wiz_0
+    --        port map (
+    --            clk_out1 => clock,
+    --            clk_in1  => i_clock
+    --        );
 
 
+    ---- Timing sync generation    ---- 
 
---    TEST_PATTERN :block
---    begin
---        red      <= data_count(3) and data_count2(3) and (data_count(7)) and vblank ;
---        green    <= data_count(2) and data_count2(2) and (data_count(7)) and vblank ;
---        blue     <= data_count(4) and data_count2(4) and (data_count(7)) and vblank ;
---        VGAports.red    <= red & red & red & red & red;
---        VGAports.green  <= green & green & green & green & green & green;
---        VGAports.blue   <= blue & blue & blue  & blue  & blue;
+    TimingSync_Module: component TimingSync
+        Port map (
+            clk           => clock,
+            clr_n         => not (i_reset),
+            hsync         => h256,
+            vsync         => vsync,
+            compsync      => compsync,
+            vblank        => vblank,
+            h1_out        => h1,
+            v1_out        => v1,
+            h256_out      => h256_out,
+            h256_ast_out  => h256_ast_out,
+            low_count     => data_count,
+            high_count    => data_count2
+        );
 
---    end block TEST_PATTERN;
-
-
-ic74ls139_4D : component LS74139
-    Port map(
-        oe_n   =>  not(data_count(1) and data_count(0) and h1),
-        sel    =>  h256_out & h256_ast_out,
-        y0     =>  y0,
-        y1     =>  y1,
-        y2     =>  y2,
-        y3     =>  y3
-    );
-
-ic74ls166_4D : component LS74166
-    Port map(
-        clr_n           => not (i_reset),
-        clk             => clock,
-        clk_dis         => '0',
-        serial          => '0',
-        shift_load      => y0 and y1,
-        d               => rom_data,
-        qh              => ic74ls166_4D_1_qh
-    );
+    VGAports.h_sync  <= h256;
+    VGAports.v_sync  <= vsync;
 
 
 
+    --    TEST_PATTERN :block
+    --    begin
+    --        red      <= data_count(3) and data_count2(3) and (data_count(7)) and vblank ;
+    --        green    <= data_count(2) and data_count2(2) and (data_count(7)) and vblank ;
+    --        blue     <= data_count(4) and data_count2(4) and (data_count(7)) and vblank ;
+    --        VGAports.red    <= red & red & red & red & red;
+    --        VGAports.green  <= green & green & green & green & green & green;
+    --        VGAports.blue   <= blue & blue & blue  & blue  & blue;
 
-ROM2716 : component  M2716
-    port map (
-        clk    => i_clock32M,
-        oe_n   => '0',
-        ce_n   => '0',
-        addr   => tile & data_count2(1) & data_count2(0) & v1, --x"CE" & data_count2(1) & data_count2(0) & v1,
-        data   => rom_data
-    );
---        //rom_addr <= x"CE";      ---Update me
-
-ic74ls174_3J : component LS74174
-    Port map(
-        clr_n   => not(i_reset ),
-        clk     => y0 and y1,
-        d       => tile(7 downto 2), --"110011",
-        q       => ic74ls174_3J_1_q
-    );
-
-ic7052_3L : component IC7052
-    port map(
-        clk     => i_clock32M,
-        oe_n    => not(vblank),
-        ce_n    => not(vblank),
-        addr    => ic74ls174_3J_1_q & '0' & ic74ls166_4D_1_qh,
-        data    => color_data  --blue & green & red & red2
-    );
-
-VGAports.blue   <= color_data(3) & color_data(3) & color_data(3) & color_data(3) & color_data(3);
-VGAports.green  <= color_data(2) & color_data(2) & color_data(2) & color_data(2) & color_data(2) & color_data(2);
-VGAports.red    <= color_data(1) & color_data(1) & color_data(1) & color_data(1) & color_data(1);
+    --    end block TEST_PATTERN;
 
 
-
-
-    ic_static_frame_mux_1 : component  LS74157 
+    ic74ls139_4D : component LS74139
         Port map(
-            sel          => '1', 
-            en_n         => '1' and  (h256_out) , 
-            d0           => "0000", 
-            d1           => '0' & '0' & data_count2(6) & data_count2(5), 
-            z            => rom_addr_static (11 downto 8) 
+            oe_n   =>  not(data_count(1) and data_count(0) and h1),
+            sel    =>  h256_out & h256_ast_out,
+            y0     =>  y0,
+            y1     =>  y1,
+            y2     =>  y2,
+            y3     =>  y3
+        );
+
+    ic74ls166_4D : component LS74166
+        Port map(
+            clr_n           => not (i_reset),
+            clk             => clock,
+            clk_dis         => '0',
+            serial          => '0',
+            shift_load      => y0 and y1,
+            d               => rom_data,
+            qh              => ic74ls166_4D_1_qh
+        );
+
+
+
+
+    ROM2716 : component  M2716
+        port map (
+            clk    => i_clock32M,
+            oe_n   => '0',
+            ce_n   => '0',
+            addr   => tile & data_count2(1) & data_count2(0) & v1, --x"CE" & data_count2(1) & data_count2(0) & v1,
+            data   => rom_data
+        );
+    --        //rom_addr <= x"CE";      ---Update me
+
+    ic74ls174_3J : component LS74174
+        Port map(
+            clr_n   => not(i_reset ),
+            clk     => clock, --i_clock32M,
+            d       => tile(7 downto 2), --"110011",
+            q       => ic74ls174_3J_1_q,
+            enable  =>y0 and y1
+        );
+
+    ic7052_3L : component IC7052
+        port map(
+            clk     => i_clock32M,
+            oe_n    => not(vblank),
+            ce_n    => not(vblank),
+            addr    => ic74ls174_3J_1_q & '0' & ic74ls166_4D_1_qh,
+            data    => color_data  --blue & green & red & red2
+        );
+
+    VGAports.blue   <= color_data(3) & color_data(3) & color_data(3) & color_data(3) & color_data(3);
+    VGAports.green  <= color_data(2) & color_data(2) & color_data(2) & color_data(2) & color_data(2) & color_data(2);
+    VGAports.red    <= color_data(1) & color_data(1) & color_data(1) & color_data(1) & color_data(1);
+
+
+
+
+    ic_static_frame_mux_1 : component  LS74157
+        Port map(
+            sel          => '1',
+            en_n         => '1' and  (h256_out) ,
+            d0           => "0000",
+            d1           => '0' & '0' & data_count2(6) & data_count2(5),
+            z            => rom_addr_static (11 downto 8)
+        );
+
+    ic_static_frame_mux_2 : component  LS74157
+        Port map(
+            sel          => '1',
+            en_n         => '1' and  (h256_out) ,
+            d0           => "0000",
+            d1           => data_count2(4) & data_count2(3) &  data_count2(2) & data_count(6),
+            z            => rom_addr_static (7 downto 4)
+        );
+
+    ic_static_frame_mux_3 : component  LS74157
+        Port map(
+            sel          => '1',
+            en_n         => '0'  ,
+            d0           => "0000",
+            d1           => data_count(5) & data_count(4) & data_count(3) & data_count(2),
+            z            => rom_addr_static (3 downto 0)
         );
         
-    ic_static_frame_mux_2 : component  LS74157 
+ 
+ 
+    icStatic_frame: component LS74273
         Port map(
-            sel          => '1', 
-            en_n         => '1' and  (h256_out) , 
-            d0           => "0000",
-            d1           => data_count2(4) & data_count2(3) &  data_count2(2) & data_count(6), 
-            z            => rom_addr_static (7 downto 4) 
-        );
-
-    ic_static_frame_mux_3 : component  LS74157 
-        Port map(
-            sel          => '1', 
-            en_n         => '0'  , 
-            d0           => "0000", 
-            d1           => data_count(5) & data_count(4) & data_count(3) & data_count(2), 
-            z            => rom_addr_static (3 downto 0) 
-        );        
-
-icStatic_frame: component LS74273 
-        Port map(
-            clr_n   => not(i_reset ), 
-            clk     => (data_count(1)),  --h4
-            d       => tile_to_display, 
-            q       => tile 
+            clr_n   => not(i_reset ),
+            clk     => data_count(1),  --h4
+            d       => tile_to_display,
+            q       => tile ,
+            enable  => '1'
         );
 
 
-    isM2716_static : component  M2716_static_frame 
+    isM2716_static : component  M2716_static_frame
         port map(
-            clk    => i_clock32M, 
-            oe_n   => '0' , 
-            ce_n   => '0', 
-            addr   => rom_addr_static(10 downto 0), 
+            clk    => i_clock32M,
+            oe_n   => '0' ,
+            ce_n   => '0',
+            addr   => rom_addr_static(10 downto 0),
             data   => tile_to_display
         );
 
