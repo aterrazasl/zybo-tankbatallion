@@ -92,5 +92,5 @@
 #auto generated files 
 #########
 TankBatallion*
-vivado.jou
+vivado*.jou
 !*.bit
