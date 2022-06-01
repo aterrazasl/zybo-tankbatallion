@@ -91,14 +91,210 @@ end Behavioral;
 
 
 
+--Implementation of 74LS273
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74273 is
+    Port (
+        clr_n   : in std_logic;
+        clk     : in std_logic;
+        d       : in std_logic_vector(7 downto 0);
+        q       : out std_logic_vector(7 downto 0);
+        enable  : in std_logic
+    );
+end LS74273;
+
+architecture Behavioral of LS74273 is
+begin
+
+    process (clr_n, clk) is
+    begin
+        if clr_n = '0' then
+            q <= x"00";
+        elsif rising_edge(clk) then
+            if enable = '1' then
+                q <= d;
+            end if;
+        end if;
+    end process;
+end Behavioral;
+
+
+
+
+
+--Implementation of 74LS174
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74174 is
+    Port (
+        clr_n   : in std_logic;
+        clk     : in std_logic;
+        d       : in std_logic_vector(5 downto 0);
+        q       : out std_logic_vector(5 downto 0);
+        enable  : in std_logic
+    );
+end LS74174;
+
+architecture Behavioral of LS74174 is
+    signal q_temp : std_logic_vector(5 downto 0);
+begin
+
+
+    process (clr_n, clk) is
+    begin
+        if clr_n = '0' then
+            q <= "000000";
+        elsif rising_edge(clk) then
+            if enable = '0' then
+                q <= d;
+            end if;
+        end if;
+    end process;
+
+end Behavioral;
+
+
+--Implementation of 74LS139
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74139 is
+    Port (
+        oe_n   : in std_logic;
+        sel    : in std_logic_vector(1 downto 0);
+        y0     : out std_logic;
+        y1     : out std_logic;
+        y2     : out std_logic;
+        y3     : out std_logic
+    );
+end LS74139;
+
+architecture Behavioral of LS74139 is
+    signal temp : std_logic_vector (3 downto 0);
+begin
+
+    y0 <= temp(0) when oe_n='0' else '1';
+    y1 <= temp(1) when oe_n='0' else '1';
+    y2 <= temp(2) when oe_n='0' else '1';
+    y3 <= temp(3) when oe_n='0' else '1';
+
+
+    with sel select
+ temp <= "1101" when "01",
+        "1011" when "10",
+        "0111" when "11",
+        "1110" when others;
+
+end Behavioral;
+
+
+
+--Implementation of 74LS166
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74166 is
+    Port (
+        clr_n           : in std_logic;
+        clk             : in std_logic;
+        clk_dis          : in std_logic;
+        serial          : in std_logic;
+        shift_load      : in std_logic;
+        d               : in std_logic_vector(7 downto 0);
+        qh              : out std_logic
+    );
+end LS74166;
+
+architecture Behavioral of LS74166 is
+    signal q_temp : std_logic_vector(7 downto 0);
+begin
+
+    qh   <=     q_temp(7);
+
+    process (clk,clr_n, shift_load )
+    begin
+        if (clr_n ='0') then
+            q_temp <= x"00";
+        elsif (rising_edge (clk) ) then
+
+            if(clk_dis ='0' and shift_load ='0') then
+                q_temp <= d;
+            elsif (clk_dis ='0' and shift_load ='1') then
+                q_temp <= q_temp (6 downto 0) & serial;
+            else
+                q_temp <= q_temp;
+
+            end if;
+        end if;
+    end process;
+end Behavioral;
 
 
 
 
 
 
+--Implementation of 74LS157
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 
+entity LS74157 is
+    Port (
+        sel          :  in std_logic;
+        en_n         :  in std_logic;
+        d0           :  in std_logic_vector(3 downto 0);
+        d1           :  in std_logic_vector(3 downto 0);
+        z            : out std_logic_vector(3 downto 0)
+    );
+end LS74157;
+
+architecture Behavioral of LS74157 is
+    signal q_temp : std_logic_vector(3 downto 0);
+begin
+
+    q_temp    <= d0     when  sel = '0' else d1;
+
+    z         <= q_temp when en_n = '0' else "0000";
+
+end Behavioral;
 
 
 

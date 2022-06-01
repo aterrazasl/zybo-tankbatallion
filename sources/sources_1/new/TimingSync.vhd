@@ -12,6 +12,10 @@ entity TimingSync is
         vsync     : out std_logic;
         compsync  : out std_logic;
         vblank    : out std_logic;
+        h1_out    : out std_logic;
+        v1_out    : out std_logic;
+        h256_out    : out std_logic;
+        h256_ast_out    : out std_logic;
         low_count : out std_logic_vector (7 downto 0);
         high_count: out std_logic_vector (7 downto 0)
     );
@@ -26,14 +30,17 @@ architecture Behavioral of TimingSync is
 
     signal q_n_loop :std_logic;
     signal q_loop :std_logic;
-    
+
     signal h1, h2, h4, h8, h16, h32, h64, h128, h256, h256_n  : std_logic;
     signal v1, v2, v4, v8, v16, v32, v64, v128, v256          : std_logic;
-    
+
     signal ic74ls74_5A_2_q, ic74ls74_5A_2_q_n, ic74ls74_5D_1_q_n, ic74ls74_5D_1_q, ic74ls161_6D_1_rco :std_logic;
 
 
 begin
+    h1_out<= h1;
+    v1_out<= v1;
+
     vsync <= data_count2(7);
     compsync <= data_count2(7) and ic74ls74_5A_2_q_n;
     low_count  <= data_count;    -- Exposing 1H to 256H
@@ -58,7 +65,7 @@ begin
     v32   <=  data_count2(4);
     v64   <=  data_count2(5);
     v128  <=  data_count2(6);
-    v256  <=  data_count2(7);  
+    v256  <=  data_count2(7);
 
     ic74ls74_5A_1: component LS7474
         Port map (
@@ -77,7 +84,7 @@ begin
             clk       => clk,
             enp      => q_loop,
             ent        =>q_loop,
-            data_input  => "01000000",
+            data_input  => x"40", --"01000000",
             data_output => data_count,
             rco        => rco
         );
@@ -91,7 +98,19 @@ begin
             q      => ic74ls74_5A_2_q,
             q_n    => ic74ls74_5A_2_q_n
         );
-        
+
+
+    h256_out <= h256_n;
+    ic74ls74_5D_2: component LS7474
+        Port map (
+            clr_n  => clr_n,
+            pr_n   => '1',
+            clk    => h8,
+            d      => h256_n,
+            q      => h256_ast_out,
+            q_n    => open
+        );
+
     ic74ls74_5D_1: component LS7474
         Port map (
             clr_n  => clr_n,
@@ -109,7 +128,7 @@ begin
             clk       => ic74ls74_5A_2_q_n,
             enp      => ic74ls74_5D_1_q,
             ent        =>ic74ls74_5D_1_q,
-            data_input  => "01111100",
+            data_input  => x"7c", --"01111100",
             data_output => data_count2,
             rco        => ic74ls161_6D_1_rco
         );
