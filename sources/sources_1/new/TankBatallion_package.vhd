@@ -198,6 +198,44 @@ package tank_batallion_defs is
         );
     end component scandoubler;
 
+
+    component cpu_clock is
+        Port (
+            clk         : in std_logic;
+            rst_n       : in std_logic ;
+            Phi2        : in std_logic ;
+            cpu_clken   : out std_logic
+        );
+    end component cpu_clock;
+
+
+    component arlet_6502
+        port (
+            clk            : in std_logic ;
+            enable         : in std_logic ;
+            rst_n          : in std_logic ;
+            ab             : out std_logic_vector (15 downto 0);
+            dbi             : in std_logic_vector (7 downto 0);
+            dbo             : out std_logic_vector (7 downto 0);
+            we              : out std_logic;
+            irq_n           : in std_logic ;
+            nmi_n           : in std_logic ;
+            ready           : in std_logic ;
+            pc_monitor      : out std_logic_vector (15 downto 0)
+        );
+    end component;
+
+    component M2716_rom is
+        port(
+            clk    : in  std_logic;
+            oe_n   : in  std_logic;
+            ce_n   : in  std_logic;
+            addr   : in  std_logic_vector(12 downto 0);
+            data   : out std_logic_vector(7 downto 0)
+        );
+    end component M2716_rom;
+
+
 end package tank_batallion_defs;
 
 

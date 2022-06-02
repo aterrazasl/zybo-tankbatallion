@@ -175,9 +175,9 @@ begin
             d1           => data_count(5) & data_count(4) & data_count(3) & data_count(2),
             z            => rom_addr_static (3 downto 0)
         );
-        
- 
- 
+
+
+
     icStatic_frame: component LS74273
         Port map(
             clr_n   => not(i_reset ),
@@ -196,6 +196,56 @@ begin
             addr   => rom_addr_static(10 downto 0),
             data   => tile_to_display
         );
+
+
+
+
+    TEST_CPU :block
+        ---- Timing sync generation    ---- 
+
+        use work.tank_batallion_defs.all;
+        signal cpu_clken : std_logic ;
+        signal A : std_logic_vector (15 downto 0);
+        signal cpudata_in, cpudata_out : std_logic_vector (7 downto 0);
+        signal r_w, nIRQ : std_logic ;
+    begin
+        CPU_CLOCK_MOD : component cpu_clock
+            Port map (
+                clk         => clock,
+                rst_n       => not(i_reset),
+                Phi2        => data_count(1) ,
+                cpu_clken   => cpu_clken
+            );
+
+
+        CPU_6502 : component  arlet_6502
+            Port map (
+                clk             => clock,
+                enable          => cpu_clken,
+                rst_n           => not(i_reset),
+                ab              => A,
+                dbi             => cpudata_in,
+                dbo             => cpudata_out,
+                we              => r_w,
+                irq_n           => nIRQ,
+                nmi_n           => '1',
+                ready           => cpu_clken,
+                pc_monitor   =>  open
+            );
+
+
+        ROM_MEMORY : component M2716_rom
+            port map(
+                clk    => clock,
+                oe_n   => '0',
+                ce_n   => '0',
+                addr   => A(12 downto 0),
+                data   => cpudata_in
+            );
+
+
+
+    end block TEST_CPU;
 
 
 end Behavioral;
