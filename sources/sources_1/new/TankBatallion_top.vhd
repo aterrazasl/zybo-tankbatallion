@@ -42,6 +42,20 @@ architecture Behavioral of TankBatallion_top is
 
     signal rom_addr_static : std_logic_vector (11 downto 0);
 
+
+
+    --cpu signal
+    signal cpu_clken : std_logic ;
+    signal A : std_logic_vector (15 downto 0);
+    signal cpudata_in, cpudata_out, romdata_out, ramdata_out, ramVdata_out : std_logic_vector (7 downto 0);
+    signal r_w, nIRQ : std_logic ;
+    signal nROM, nWO, nWRAM, nVRAM : std_logic ;
+    signal nWRAM0_VA,nVRAM_VA : std_logic ;
+    signal D4_1_y : std_logic ;
+    signal F4_o9,F4_o8,nDIPSW,F4_o6,nIN1,nIN0,nWDR,nINTACK,nOUT1,nOUT0 : std_logic;
+    signal ic74ls42_4f_dout : std_logic_vector (9 downto 0);
+    signal C4_6 , C3_2_y: std_logic ;
+
 begin
 
 
@@ -70,7 +84,9 @@ begin
             h256_out      => h256_out,
             h256_ast_out  => h256_ast_out,
             low_count     => data_count,
-            high_count    => data_count2
+            high_count    => data_count2,
+            nIRQ          => nIRQ,
+            nINTACK       => nINTACK
         );
 
     VGAports.h_sync  <= h256;
@@ -154,7 +170,7 @@ begin
             sel          => '1',
             en_n         => '1' and  (h256_out) ,
             d0           => "0000",
-            d1           => '0' & '0' & data_count2(6) & data_count2(5),
+            d1           => '1' & '0' & data_count2(6) & data_count2(5),
             z            => rom_addr_static (11 downto 8)
         );
 
@@ -188,64 +204,125 @@ begin
         );
 
 
-    isM2716_static : component  M2716_static_frame
+    --    isM2716_static : component  M2716_static_frame
+    --        port map(
+    --            clk    => i_clock32M,
+    --            oe_n   => '0' ,
+    --            ce_n   => '0',
+    --            addr   => rom_addr_static(10 downto 0),
+    --            data   => tile_to_display
+    --        );
+
+
+
+
+    CPU_CLOCK_MOD : component cpu_clock
+        Port map (
+            clk         => i_clock32M,
+            rst_n       => not(i_reset),
+            Phi2        => data_count(1) ,
+            cpu_clken   => cpu_clken
+        );
+
+
+    CPU_6502 : component  arlet_6502
+        Port map (
+            clk             => i_clock32M,
+            enable          => cpu_clken,
+            rst_n           => not(i_reset),
+            ab              => A,
+            dbi             => cpudata_in,
+            dbo             => cpudata_out,
+            we              => r_w,
+            irq_n           => not(nIRQ),
+            nmi_n           => '1',
+            ready           => cpu_clken,
+            pc_monitor   =>  open
+        );
+
+    nROM <= not (A(13));
+
+    ROM_MEMORY : component M2716_rom
         port map(
             clk    => i_clock32M,
-            oe_n   => '0' ,
-            ce_n   => '0',
-            addr   => rom_addr_static(10 downto 0),
-            data   => tile_to_display
+            oe_n   => nROM,
+            ce_n   => nROM,
+            addr   => A(12 downto 0),
+            data   => romdata_out
+        );
+    
+    
+    C3_2_y <= '0' when ((A(13)='0') and (r_w ='1')) else '1';
+    C4_6  <= not(nROM) and C3_2_y;
+
+    nWRAM <= '0' when (A(10)='0' and A(11) ='0' and C4_6 ='0') else
+             '0' when (A(10)='1' and A(11) ='0' and C4_6 ='0') else
+             '1';
+
+    nVRAM <= '0' when (A(10)='0' and A(11) ='1' and C4_6 ='0') else
+             '1';
+
+    nWO   <= '0' when ((A(13)='0') and (r_w ='0')) else '1';
+
+    RAM_MEMORY : component game_ram
+        port map(
+            clka    => i_clock32M,
+            clkb    => i_clock32M,
+            ena     => '1',
+            enb     => '1',
+            wea     => (not(nWO) and not(nWRAM)) or (not(nWO) and not(nVRAM)),
+            web     => '0',
+            addra   => A(11 downto 0),
+            addrb   => rom_addr_static,
+            dia     => cpudata_out,
+            dib     => x"00",
+            doa     => ramdata_out ,
+            dob     => ramVdata_out
         );
 
 
 
-
-    TEST_CPU :block
-        ---- Timing sync generation    ---- 
-
-        use work.tank_batallion_defs.all;
-        signal cpu_clken : std_logic ;
-        signal A : std_logic_vector (15 downto 0);
-        signal cpudata_in, cpudata_out : std_logic_vector (7 downto 0);
-        signal r_w, nIRQ : std_logic ;
-    begin
-        CPU_CLOCK_MOD : component cpu_clock
-            Port map (
-                clk         => clock,
-                rst_n       => not(i_reset),
-                Phi2        => data_count(1) ,
-                cpu_clken   => cpu_clken
-            );
-
-
-        CPU_6502 : component  arlet_6502
-            Port map (
-                clk             => clock,
-                enable          => cpu_clken,
-                rst_n           => not(i_reset),
-                ab              => A,
-                dbi             => cpudata_in,
-                dbo             => cpudata_out,
-                we              => r_w,
-                irq_n           => nIRQ,
-                nmi_n           => '1',
-                ready           => cpu_clken,
-                pc_monitor   =>  open
-            );
-
-
-        ROM_MEMORY : component M2716_rom
-            port map(
-                clk    => clock,
-                oe_n   => '0',
-                ce_n   => '0',
-                addr   => A(12 downto 0),
-                data   => cpudata_in
-            );
+    cpudata_in <= romdata_out when nROM = '0' else
+                 ramdata_out when nWRAM ='0' else
+                 ramdata_out when nVRAM ='0' else
+                 x"ff" when nDIPSW ='0' else
+                 x"ff";
 
 
 
-    end block TEST_CPU;
+
+    nWRAM0_VA <= '1' when (rom_addr_static(11 downto 4) = "00000000") else
+                '0';
+    nVRAM_VA  <= '1' when (rom_addr_static(11 downto 10) = "10")      else
+                '0';
+
+    tile_to_display <= ramVdata_out when (nWRAM0_VA ='1' or nVRAM_VA  = '1' )else
+                        x"FF";
+
+
+
+    D4_1_y <= '0' when (A(10)='1') and (A(11)='1' and C4_6 ='0') else
+                '1';
+
+
+    ic74ls42_4f :component LS7442
+        Port map (
+            din           => D4_1_y & nWO & A(4) & A(3),
+            dout          => ic74ls42_4f_dout
+        );
+
+
+F4_o9   <= ic74ls42_4f_dout(9);
+F4_o8   <= ic74ls42_4f_dout(8);
+nDIPSW  <= ic74ls42_4f_dout(7);
+F4_o6   <= ic74ls42_4f_dout(6);
+nIN1    <= ic74ls42_4f_dout(5);
+nIN0    <= ic74ls42_4f_dout(4);
+nWDR    <= ic74ls42_4f_dout(3);
+nINTACK <= ic74ls42_4f_dout(2);
+nOUT1   <= ic74ls42_4f_dout(1);
+nOUT0   <= ic74ls42_4f_dout(0);
+
 
 
 end Behavioral;

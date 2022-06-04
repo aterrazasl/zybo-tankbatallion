@@ -298,3 +298,37 @@ end Behavioral;
 
 
 
+--Implementation of 74LS42
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS7442 is
+    Port (
+        din           :  in std_logic_vector(3 downto 0);
+        dout          :  out std_logic_vector(9 downto 0)
+    );
+end LS7442;
+
+architecture Behavioral of LS7442 is
+begin
+    with din select
+ dout <= "1111111110" when "0000",
+         "1111111101" when "0001",
+         "1111111011" when "0010",
+         "1111110111" when "0011",
+         "1111101111" when "0100",
+         "1111011111" when "0101",
+         "1110111111" when "0110",
+         "1101111111" when "0111",
+         "1011111111" when "1000",
+         "0111111111" when "1001",
+         "1111111111" when others;
+
+end Behavioral;

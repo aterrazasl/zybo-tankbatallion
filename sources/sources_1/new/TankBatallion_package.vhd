@@ -103,6 +103,14 @@ package tank_batallion_defs is
     end component LS74157;
 
 
+    component LS7442 is
+        Port (
+            din           :  in std_logic_vector(3 downto 0);
+            dout          :  out std_logic_vector(9 downto 0)
+        );
+    end component LS7442;
+
+
     component  M2716 is
         port(
             clk  : in  std_logic;
@@ -139,18 +147,20 @@ package tank_batallion_defs is
 
     component TimingSync is
         Port (
-            clk       : in std_logic;
-            clr_n     : in std_logic;
-            hsync     : out std_logic;
-            vsync     : out std_logic;
-            compsync  : out std_logic;
-            vblank    : out std_logic;
-            h1_out    : out std_logic;
-            v1_out    : out std_logic;
-            h256_out    : out std_logic;
-            h256_ast_out    : out std_logic;
-            low_count : out std_logic_vector (7 downto 0);
-            high_count: out std_logic_vector (7 downto 0)
+        clk           : in std_logic;
+        clr_n         : in std_logic;
+        hsync         : out std_logic;
+        vsync         : out std_logic;
+        compsync      : out std_logic;
+        vblank        : out std_logic;
+        h1_out        : out std_logic;
+        v1_out        : out std_logic;
+        h256_out      : out std_logic;
+        h256_ast_out  : out std_logic;
+        low_count     : out std_logic_vector (7 downto 0);
+        high_count    : out std_logic_vector (7 downto 0);
+        nIRQ          : out std_logic;
+        nINTACK       : in std_logic
         );
     end component TimingSync;
 
@@ -235,6 +245,24 @@ package tank_batallion_defs is
         );
     end component M2716_rom;
 
+
+
+    component game_ram is
+        port(
+            clka  : in  std_logic;
+            clkb  : in  std_logic;
+            ena   : in  std_logic;
+            enb   : in  std_logic;
+            wea   : in  std_logic;
+            web   : in  std_logic;
+            addra : in  std_logic_vector(11 downto 0);
+            addrb : in  std_logic_vector(11 downto 0);
+            dia   : in  std_logic_vector(7 downto 0);
+            dib   : in  std_logic_vector(7 downto 0);
+            doa   : out std_logic_vector(7 downto 0);
+            dob   : out std_logic_vector(7 downto 0)
+        );
+    end component game_ram;
 
 end package tank_batallion_defs;
 
