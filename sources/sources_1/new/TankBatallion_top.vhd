@@ -55,6 +55,9 @@ architecture Behavioral of TankBatallion_top is
     signal F4_o9,F4_o8,nDIPSW,F4_o6,nIN1,nIN0,nWDR,nINTACK,nOUT1,nOUT0 : std_logic;
     signal ic74ls42_4f_dout : std_logic_vector (9 downto 0);
     signal C4_6 , C3_2_y: std_logic ;
+    
+    signal vCount, hCount : std_logic_vector (8 downto 0);
+    signal bullet_out : std_logic ;
 
 begin
 
@@ -86,7 +89,9 @@ begin
             low_count     => data_count,
             high_count    => data_count2,
             nIRQ          => nIRQ,
-            nINTACK       => nINTACK
+            nINTACK       => nINTACK,
+            v_out         => vCount,
+            h_out         => hCount
         );
 
     VGAports.h_sync  <= h256;
@@ -154,7 +159,7 @@ begin
             clk     => i_clock32M,
             oe_n    => not(vblank),
             ce_n    => not(vblank),
-            addr    => ic74ls174_3J_1_q & '0' & ic74ls166_4D_1_qh,
+            addr    => ic74ls174_3J_1_q & bullet_out & ic74ls166_4D_1_qh,
             data    => color_data  --blue & green & red & red2
         );
 
@@ -323,6 +328,24 @@ nINTACK <= ic74ls42_4f_dout(2);
 nOUT1   <= ic74ls42_4f_dout(1);
 nOUT0   <= ic74ls42_4f_dout(0);
 
+
+
+
+
+    BULLET_RENDER:  component BulletRender 
+        Port map(
+            clk              =>  clock ,
+            clk_32M          =>  i_clock32M ,
+            clr_n            =>  not (i_reset),
+            hCount           =>  hCount ,
+            vCount           =>  vCount,
+            h256_out         =>  h256_out ,
+            h256_ast_out     =>  h256_ast_out ,
+            data_in          =>  tile,
+            load_count       =>  y3,
+            clear_count      =>  y1,
+            data_out         =>  bullet_out
+        );
 
 
 end Behavioral;

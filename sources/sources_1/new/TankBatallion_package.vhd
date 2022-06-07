@@ -147,20 +147,22 @@ package tank_batallion_defs is
 
     component TimingSync is
         Port (
-        clk           : in std_logic;
-        clr_n         : in std_logic;
-        hsync         : out std_logic;
-        vsync         : out std_logic;
-        compsync      : out std_logic;
-        vblank        : out std_logic;
-        h1_out        : out std_logic;
-        v1_out        : out std_logic;
-        h256_out      : out std_logic;
-        h256_ast_out  : out std_logic;
-        low_count     : out std_logic_vector (7 downto 0);
-        high_count    : out std_logic_vector (7 downto 0);
-        nIRQ          : out std_logic;
-        nINTACK       : in std_logic
+            clk           : in std_logic;
+            clr_n         : in std_logic;
+            hsync         : out std_logic;
+            vsync         : out std_logic;
+            compsync      : out std_logic;
+            vblank        : out std_logic;
+            h1_out        : out std_logic;
+            v1_out        : out std_logic;
+            h256_out      : out std_logic;
+            h256_ast_out  : out std_logic;
+            low_count     : out std_logic_vector (7 downto 0);
+            high_count    : out std_logic_vector (7 downto 0);
+            nIRQ          : out std_logic;
+            nINTACK       : in std_logic;
+            v_out         : out std_logic_vector (8 downto 0);
+            h_out         : out std_logic_vector (8 downto 0)
         );
     end component TimingSync;
 
@@ -263,6 +265,36 @@ package tank_batallion_defs is
             dob   : out std_logic_vector(7 downto 0)
         );
     end component game_ram;
+
+    component MB8125 is
+        port(
+            clk  : in  std_logic;
+            we   : in  std_logic;
+            en   : in  std_logic;
+            addr : in  std_logic_vector(9 downto 0);
+            di   : in  std_logic;
+            do   : out std_logic
+        );
+    end component MB8125;
+
+
+
+    component BulletRender is
+        Port (
+            clk             : in std_logic;
+            clk_32M         : in std_logic ;
+            clr_n           : in std_logic;
+            hCount          : in std_logic_vector (8 downto 0) ;
+            vCount          : in std_logic_vector (8 downto 0) ;
+            h256_out        : in std_logic ;
+            h256_ast_out    : in std_logic ;
+            data_in         : in std_logic_vector(7 downto 0);
+            load_count      : in std_logic ;
+            clear_count      : in std_logic ;
+            data_out        : out std_logic
+        );
+    end component BulletRender;
+
 
 end package tank_batallion_defs;
 

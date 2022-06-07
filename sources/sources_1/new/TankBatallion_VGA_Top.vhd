@@ -29,9 +29,22 @@ architecture Behavioral of TankBatallion_VGA_Top is
     signal VGA2 : VGA_output_ports ;
     signal clock_6, clock_32 : std_logic ;
     signal r,b : std_logic_vector (5 downto 0) ;
+    signal reset_gen : std_logic ;
+    signal reset_count : std_logic_vector (15 downto 0) := "1111111111111111";
 
 
 begin
+reset_gen <= i_reset  or reset_count(15);
+
+
+    process (clock_6 )
+    begin
+        if (rising_edge (clock_6) ) then
+            reset_count <= reset_count(14 downto 0) & '0';
+        end if;
+    end process;
+
+
 
     CLOCK_32MHZ : component clk_wiz_1
         port map (
@@ -42,7 +55,7 @@ begin
 
     TankBat : component TankBatallion_top
         port map (
-            i_reset     => i_reset,
+            i_reset     => reset_gen,
             i_clock     => clock_6,
             i_clock32M  => clock_32 ,
             VGAports    => VGA,

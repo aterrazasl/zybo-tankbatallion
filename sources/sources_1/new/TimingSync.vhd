@@ -19,7 +19,9 @@ entity TimingSync is
         low_count     : out std_logic_vector (7 downto 0);
         high_count    : out std_logic_vector (7 downto 0);
         nIRQ          : out std_logic;
-        nINTACK       : in std_logic
+        nINTACK       : in std_logic;
+        v_out         : out std_logic_vector (8 downto 0);
+        h_out         : out std_logic_vector (8 downto 0)
     );
 end TimingSync;
 
@@ -40,6 +42,10 @@ architecture Behavioral of TimingSync is
 
 
 begin
+
+    v_out <= data_count2 & v1;
+    h_out <= data_count & h1;
+    
     h1_out<= h1;
     v1_out<= v1;
 
