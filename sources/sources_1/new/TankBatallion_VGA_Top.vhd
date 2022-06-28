@@ -23,7 +23,6 @@ architecture Behavioral of TankBatallion_VGA_Top is
 
     signal VGA_TB, VGA_SD : VGA_output_ports ;
     signal clock_6, clock_32, reset_gen : std_logic ;
-    signal reset_count : std_logic_vector (15 downto 0) := "1111111111111111";
     signal enable_scandoubler : std_logic := '1';   -- 1 enables scandoubler, 0 uses the signals from the tank batallion game --
 
 begin
@@ -38,14 +37,11 @@ begin
         );
 
     -- Generates reset foor 15 clock cycles  --  
-    reset_gen <= '0'  or reset_count(15);
-    process (clock_6 )
-    begin
-        if (rising_edge (clock_6) ) then
-            reset_count <= reset_count(14 downto 0) & '0';
-        end if;
-    end process;
-
+    RESET_GENERATOR : component ResetGenerator
+        Port map(
+            clock  => clock_6,
+            reset => reset_gen
+        );
 
     -- Tank Batallion game core --
     TankBat : component TankBatallion_top

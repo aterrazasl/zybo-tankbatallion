@@ -1,27 +1,25 @@
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 use work.tank_batallion_defs.all;
 
 
 entity TankBatallion_top is
     port (
-        i_reset     : in std_logic ;
-        i_left      : in   std_logic;
-        i_right     : in   std_logic;
-        i_up        : in   std_logic;
-        i_down      : in   std_logic;
-        i_shoot     : in std_logic;
-        i_clock      : in  std_logic;   -- 125Mhz input clock from L16
-        i_clock32M   : in std_logic ;
-        VGAports     : out VGA_output_ports;
-        pl_start     : in std_logic ;
-        coin_sw1     : in std_logic ;
-        test_sw      : in std_logic ;
-        serv_sw      : in std_logic 
+        i_reset      : in   std_logic;
+        i_left       : in   std_logic;
+        i_right      : in   std_logic;
+        i_up         : in   std_logic;
+        i_down       : in   std_logic;
+        i_shoot      : in   std_logic;
+        i_clock      : in   std_logic;   -- 6Mhz input clock required
+        i_clock32M   : in   std_logic;
+        VGAports     : out  VGA_output_ports;
+        pl_start     : in   std_logic;
+        coin_sw1     : in   std_logic;
+        test_sw      : in   std_logic;
+        serv_sw      : in   std_logic 
     );
 end TankBatallion_top;
 
@@ -29,7 +27,6 @@ architecture Behavioral of TankBatallion_top is
 
     use work.tank_batallion_defs.all;
 
-    signal clock : std_logic;
     signal data_count, data_count2 : std_logic_vector (7 downto 0);
 
     signal h256, compsync, vblank, vsync : std_logic ;
@@ -72,22 +69,11 @@ architecture Behavioral of TankBatallion_top is
     signal dipsw_q, in1_q, in0_q : std_logic ;
 begin
 
-
-    --tile_to_display <= x"A" & '0' & fixed_tile;
-
-    clock <= i_clock ;
-    --    CLOCK_6MHZ : clk_wiz_0
-    --        port map (
-    --            clk_out1 => clock,
-    --            clk_in1  => i_clock
-    --        );
-
-
     ---- Timing sync generation    ---- 
 
     TimingSync_Module: component TimingSync
         Port map (
-            clk           => clock,
+            clk           => i_clock,
             clr_n         => not (i_reset),
             hsync         => h256,
             vsync         => vsync,
@@ -135,7 +121,7 @@ begin
     ic74ls166_4D : component LS74166
         Port map(
             clr_n           => not (i_reset),
-            clk             => clock,
+            clk             => i_clock,
             clk_dis         => '0',
             serial          => '0',
             shift_load      => y0 and y1,
@@ -159,7 +145,7 @@ begin
     ic74ls174_3J : component LS74174
         Port map(
             clr_n   => not(i_reset ),
-            clk     => clock, --i_clock32M,
+            clk     => i_clock, --i_clock32M,
             d       => tile(7 downto 2), --"110011",
             q       => ic74ls174_3J_1_q,
             enable  =>y0 and y1
@@ -348,7 +334,7 @@ begin
 
     BULLET_RENDER:  component BulletRender
         Port map(
-            clk              =>  clock ,
+            clk              =>  i_clock ,
             clk_32M          =>  i_clock32M ,
             clr_n            =>  not (i_reset),
             hCount           =>  hCount ,

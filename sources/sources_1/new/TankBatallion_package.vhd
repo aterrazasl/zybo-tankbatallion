@@ -16,7 +16,7 @@ package tank_batallion_defs is
         green           : std_logic_vector (5 downto 0);
         blue            : std_logic_vector (5 downto 0);
     end record;
-    
+
     -- Type used in the top VHDL from Zybo board, difference is that blue and red uses 5 bits insted of 6 like in green -- 
     type Zybo_VGA_output_ports is record
         h_sync			: std_logic;
@@ -24,21 +24,27 @@ package tank_batallion_defs is
         red             : std_logic_vector (4 downto 0);
         green           : std_logic_vector (5 downto 0);
         blue            : std_logic_vector (4 downto 0);
-    end record;    
+    end record;
+
+
+    component ResetGenerator is
+        Port ( clock : in std_logic;
+             reset : out std_logic
+            );
+    end component ResetGenerator;
 
     component LS74161
         port (
             clr_n         : in std_logic;
             load_n        : in std_logic;
             clk           : in std_logic;
-            enp         : in std_logic;
-            ent        : in std_logic;
+            enp           : in std_logic;
+            ent           : in std_logic;
             data_input    : in std_logic_vector (7 downto 0);
             data_output   : out std_logic_vector (7 downto 0);
-            rco         : out std_logic
+            rco           : out std_logic
         );
     end component LS74161;
-
 
     component LS7474 is
         Port (
@@ -51,19 +57,6 @@ package tank_batallion_defs is
         );
     end component LS7474;
 
-    component LS7474_2 is
-        Port (
-            clr_n   : in std_logic;
-            pr_n    : in std_logic;
-            clk     : in std_logic;
-            d       : in std_logic;
-            q       : out std_logic;
-            q_n     : out std_logic;
-            enable  : in std_logic
-        );
-    end component LS7474_2;
-
-
     component LS74273 is
         Port (
             clr_n   : in std_logic;
@@ -73,7 +66,6 @@ package tank_batallion_defs is
             enable  : in std_logic
         );
     end component LS74273;
-
 
     component LS74174 is
         Port (
@@ -85,7 +77,6 @@ package tank_batallion_defs is
         );
     end component LS74174;
 
-
     component LS74139 is
         Port (
             oe_n   : in std_logic;
@@ -96,7 +87,6 @@ package tank_batallion_defs is
             y3     : out std_logic
         );
     end component LS74139;
-
 
     component LS74166 is
         Port (
@@ -110,8 +100,6 @@ package tank_batallion_defs is
         );
     end component LS74166;
 
-
-
     component  LS74157 is
         Port (
             sel          :  in std_logic;
@@ -122,7 +110,6 @@ package tank_batallion_defs is
         );
     end component LS74157;
 
-
     component LS7442 is
         Port (
             din           :  in std_logic_vector(3 downto 0);
@@ -130,40 +117,35 @@ package tank_batallion_defs is
         );
     end component LS7442;
 
-
     component  M2716 is
         port(
-            clk  : in  std_logic;
+            clk    : in  std_logic;
             oe_n   : in  std_logic;
             ce_n   : in  std_logic;
-            addr : in  std_logic_vector(10 downto 0);
-            data : out std_logic_vector(7 downto 0)
+            addr   : in  std_logic_vector(10 downto 0);
+            data   : out std_logic_vector(7 downto 0)
         );
     end component M2716;
 
-
     component  M2716_static_frame is
         port(
-            clk  : in  std_logic;
+            clk    : in  std_logic;
             oe_n   : in  std_logic;
             ce_n   : in  std_logic;
-            addr : in  std_logic_vector(10 downto 0);
-            data : out std_logic_vector(7 downto 0)
+            addr   : in  std_logic_vector(10 downto 0);
+            data   : out std_logic_vector(7 downto 0)
         );
     end component  M2716_static_frame;
 
-
-
     component IC7052 is
         port(
-            clk  : in  std_logic;
+            clk    : in  std_logic;
             oe_n   : in  std_logic;
             ce_n   : in  std_logic;
-            addr : in  std_logic_vector(7 downto 0);
-            data : out std_logic_vector(3 downto 0)
+            addr   : in  std_logic_vector(7 downto 0);
+            data   : out std_logic_vector(3 downto 0)
         );
     end component IC7052;
-
 
     component TimingSync is
         Port (
@@ -186,15 +168,14 @@ package tank_batallion_defs is
         );
     end component TimingSync;
 
-
     component TankBatallion_top is
         port (
-            i_reset     : in std_logic ;
-            i_left      : in   std_logic;
-            i_right     : in   std_logic;
-            i_up        : in   std_logic;
-            i_down      : in   std_logic;
-            i_shoot     : in std_logic;
+            i_reset      : in std_logic ;
+            i_left       : in   std_logic;
+            i_right      : in   std_logic;
+            i_up         : in   std_logic;
+            i_down       : in   std_logic;
+            i_shoot      : in std_logic;
             i_clock      : in  std_logic;   -- 125Mhz input clock from L16
             i_clock32M   : in std_logic ;
             VGAports     : out VGA_output_ports;
@@ -214,14 +195,6 @@ package tank_batallion_defs is
         );
     end component clk_wiz_1;
 
-
-    --    component clk_wiz_0
-    --        port (
-    --            clk_out1 : out std_logic;
-    --            clk_in1  : in  std_logic
-    --        );
-    --    end component clk_wiz_0;    
-
     component scandoubler
         port (
             clk_sys   : in std_logic ;
@@ -238,7 +211,6 @@ package tank_batallion_defs is
         );
     end component scandoubler;
 
-
     component cpu_clock is
         Port (
             clk         : in std_logic;
@@ -248,13 +220,12 @@ package tank_batallion_defs is
         );
     end component cpu_clock;
 
-
     component arlet_6502
         port (
-            clk            : in std_logic ;
-            enable         : in std_logic ;
-            rst_n          : in std_logic ;
-            ab             : out std_logic_vector (15 downto 0);
+            clk             : in std_logic ;
+            enable          : in std_logic ;
+            rst_n           : in std_logic ;
+            ab              : out std_logic_vector (15 downto 0);
             dbi             : in std_logic_vector (7 downto 0);
             dbo             : out std_logic_vector (7 downto 0);
             we              : out std_logic;
@@ -274,8 +245,6 @@ package tank_batallion_defs is
             data   : out std_logic_vector(7 downto 0)
         );
     end component M2716_rom;
-
-
 
     component game_ram is
         port(
@@ -305,8 +274,6 @@ package tank_batallion_defs is
         );
     end component MB8125;
 
-
-
     component BulletRender is
         Port (
             clk             : in std_logic;
@@ -318,11 +285,10 @@ package tank_batallion_defs is
             h256_ast_out    : in std_logic ;
             data_in         : in std_logic_vector(7 downto 0);
             load_count      : in std_logic ;
-            clear_count      : in std_logic ;
+            clear_count     : in std_logic ;
             data_out        : out std_logic
         );
     end component BulletRender;
-
 
     component  LS74259 is
         Port (
@@ -333,8 +299,6 @@ package tank_batallion_defs is
             dout          :  out std_logic_vector(7 downto 0)
         );
     end component LS74259;
-
-
 
     component LS74251 is
         Port (
