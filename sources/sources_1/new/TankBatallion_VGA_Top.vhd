@@ -1,42 +1,44 @@
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 use work.tank_batallion_defs.all;
 
 entity TankBatallion_VGA_Top is
     port (
-        i_reset      : in   std_logic;
+        i_left       : in  std_logic;
+        i_right      : in  std_logic;
+        i_up         : in  std_logic;
+        i_down       : in  std_logic;
         i_clock      : in  std_logic;   -- 125Mhz input clock from L16
         i_switch_0   : in  std_logic;
         i_switch_1   : in  std_logic;
         i_switch_2   : in  std_logic;
-        i_switch_3   : in std_logic ;
-        o_led_drive  : out std_logic;
-        clock_enable : out std_logic;
-        led1         : out std_logic;
-        led2         : out std_logic;
-        VGAports     : out VGA_output_ports
+        i_switch_3   : in  std_logic ;
+        VGAports     : out Zybo_VGA_output_ports
     );
 end TankBatallion_VGA_Top;
 
 architecture Behavioral of TankBatallion_VGA_Top is
 
-
-    signal VGA : VGA_output_ports ;
-    signal VGA2 : VGA_output_ports ;
-    signal clock_6, clock_32 : std_logic ;
-    signal r,b : std_logic_vector (5 downto 0) ;
-    signal reset_gen : std_logic ;
+    signal VGA_TB, VGA_SD : VGA_output_ports ;
+    signal clock_6, clock_32, reset_gen : std_logic ;
     signal reset_count : std_logic_vector (15 downto 0) := "1111111111111111";
-
+    signal enable_scandoubler : std_logic := '1';   -- 1 enables scandoubler, 0 uses the signals from the tank batallion game --
 
 begin
-reset_gen <= i_reset  or reset_count(15);
 
+    -- Clock generation 6Mhz and arlet_6502--
+    -- 6Mhz is used in the tank batallion and 32Mhz for scandoubler --
+    CLOCK_32MHZ : component clk_wiz_1
+        port map (
+            clk_out1 => clock_6,
+            clk_out2 => clock_32,
+            clk_in1  => i_clock
+        );
 
+    -- Generates reset foor 15 clock cycles  --  
+    reset_gen <= '0'  or reset_count(15);
     process (clock_6 )
     begin
         if (rising_edge (clock_6) ) then
@@ -45,44 +47,48 @@ reset_gen <= i_reset  or reset_count(15);
     end process;
 
 
-
-    CLOCK_32MHZ : component clk_wiz_1
-        port map (
-            clk_out1 => clock_6,
-            clk_out2 => clock_32,
-            clk_in1  => i_clock
-        );
-
+    -- Tank Batallion game core --
     TankBat : component TankBatallion_top
         port map (
             i_reset     => reset_gen,
             i_clock     => clock_6,
             i_clock32M  => clock_32 ,
-            VGAports    => VGA,
-            fixed_tile  => i_switch_2 & i_switch_1 & i_switch_0
+            VGAports    => VGA_TB,
+            pl_start    => not(i_switch_0),
+            coin_sw1    => not(i_switch_1),
+            test_sw     => not(i_switch_3),
+            serv_sw     => '1',
+            i_up        => not(i_up),
+            i_down      => not(i_down),
+            i_left      => not(i_left),
+            i_right     => not(i_right),
+            i_shoot     => not(i_switch_2)
         );
 
+    -- Scandoubler generates signals for VGA --
     Scandoubler_mod : component scandoubler
         port map (
             clk_sys     => clock_32,
-            hs_in       => VGA.h_sync,
-            vs_in       => VGA.v_sync,
-            r_in        => '0' & VGA.red,
-            g_in        => VGA.green,
-            b_in        => '0' & VGA.blue, 
-            hs_out      => VGA2.h_sync, 
-            vs_out      => VGA2.v_sync, 
-            r_out       => r,    
-            g_out       => VGA2.green,  
-            b_out       => b    
+            hs_in       => VGA_TB.h_sync,
+            vs_in       => VGA_TB.v_sync,
+            r_in        => VGA_TB.red,
+            g_in        => VGA_TB.green,
+            b_in        => VGA_TB.blue,
+            hs_out      => VGA_SD.h_sync,
+            vs_out      => VGA_SD.v_sync,
+            r_out       => VGA_SD.red,
+            g_out       => VGA_SD.green,
+            b_out       => VGA_SD.blue
         );
 
-VGAports.h_sync     <= VGA2.h_sync    when i_switch_3 = '1' else VGA.h_sync; 
-VGAports.v_sync     <= VGA2.v_sync    when i_switch_3 = '1' else VGA.v_sync; 
-VGAports.red        <= r(4 downto 0)  when i_switch_3 = '1' else VGA.red;
-VGAports.green      <= VGA2.green     when i_switch_3 = '1' else VGA.green;  
-VGAports.blue       <= b(4 downto 0)  when i_switch_3 = '1' else VGA.blue;
 
+    -- Maps VGA ports for red and blue only 5 bits for Zybo board --
+    -- Also maps VGA signals from Tankbatallion game or scandoubler --  
+    VGAports.h_sync     <= VGA_SD.h_sync            when enable_scandoubler = '1' else VGA_TB.h_sync;
+    VGAports.v_sync     <= VGA_SD.v_sync            when enable_scandoubler = '1' else VGA_TB.v_sync;
+    VGAports.green      <= VGA_SD.green             when enable_scandoubler = '1' else VGA_TB.green;
+    VGAports.red        <= VGA_SD.red (4 downto 0)  when enable_scandoubler = '1' else VGA_TB.red(4 downto 0);
+    VGAports.blue       <= VGA_SD.blue(4 downto 0)  when enable_scandoubler = '1' else VGA_TB.blue(4 downto 0);
 
 end Behavioral;
 

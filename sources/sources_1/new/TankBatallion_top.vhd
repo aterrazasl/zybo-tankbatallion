@@ -9,11 +9,19 @@ use work.tank_batallion_defs.all;
 
 entity TankBatallion_top is
     port (
-        i_reset      : in   std_logic;
+        i_reset     : in std_logic ;
+        i_left      : in   std_logic;
+        i_right     : in   std_logic;
+        i_up        : in   std_logic;
+        i_down      : in   std_logic;
+        i_shoot     : in std_logic;
         i_clock      : in  std_logic;   -- 125Mhz input clock from L16
         i_clock32M   : in std_logic ;
         VGAports     : out VGA_output_ports;
-        fixed_tile   : in std_logic_vector (2 downto 0)
+        pl_start     : in std_logic ;
+        coin_sw1     : in std_logic ;
+        test_sw      : in std_logic ;
+        serv_sw      : in std_logic 
     );
 end TankBatallion_top;
 
@@ -54,11 +62,14 @@ architecture Behavioral of TankBatallion_top is
     signal D4_1_y : std_logic ;
     signal F4_o9,F4_o8,nDIPSW,F4_o6,nIN1,nIN0,nWDR,nINTACK,nOUT1,nOUT0 : std_logic;
     signal ic74ls42_4f_dout : std_logic_vector (9 downto 0);
-    signal C4_6 , C3_2_y: std_logic ;
-    
+    signal C4_6 , C3_2_y, E4_3: std_logic ;
+
     signal vCount, hCount : std_logic_vector (8 downto 0);
     signal bullet_out : std_logic ;
-
+    signal nmi_n : std_logic ;
+    signal outputs1 :std_logic_vector (7 downto 0);
+    
+    signal dipsw_q, in1_q, in0_q : std_logic ;
 begin
 
 
@@ -157,15 +168,15 @@ begin
     ic7052_3L : component IC7052
         port map(
             clk     => i_clock32M,
-            oe_n    => not(vblank),
-            ce_n    => not(vblank),
+            oe_n    => vblank,
+            ce_n    => vblank,
             addr    => ic74ls174_3J_1_q & bullet_out & ic74ls166_4D_1_qh,
             data    => color_data  --blue & green & red & red2
         );
 
-    VGAports.blue   <= color_data(3) & color_data(3) & color_data(3) & color_data(3) & color_data(3);
+    VGAports.blue   <= color_data(3) & color_data(3) & color_data(3) & color_data(3) & color_data(3) & color_data(3);
     VGAports.green  <= color_data(2) & color_data(2) & color_data(2) & color_data(2) & color_data(2) & color_data(2);
-    VGAports.red    <= color_data(1) & color_data(1) & color_data(1) & color_data(1) & color_data(1);
+    VGAports.red    <= color_data(1) & color_data(1) & color_data(1) & color_data(1) & color_data(1) & color_data(1);
 
 
 
@@ -239,8 +250,8 @@ begin
             dbi             => cpudata_in,
             dbo             => cpudata_out,
             we              => r_w,
-            irq_n           => not(nIRQ),
-            nmi_n           => '1',
+            irq_n           => nIRQ,
+            nmi_n           => nmi_n nand vblank , --'1',
             ready           => cpu_clken,
             pc_monitor   =>  open
         );
@@ -255,10 +266,11 @@ begin
             addr   => A(12 downto 0),
             data   => romdata_out
         );
-    
-    
+
+
     C3_2_y <= '0' when ((A(13)='0') and (r_w ='1')) else '1';
-    C4_6  <= not(nROM) and C3_2_y;
+    E4_3   <= nROM nand hCount(1);
+    C4_6   <=  E4_3 and C3_2_y;  --not(nROM)
 
     nWRAM <= '0' when (A(10)='0' and A(11) ='0' and C4_6 ='0') else
              '0' when (A(10)='1' and A(11) ='0' and C4_6 ='0') else
@@ -287,27 +299,29 @@ begin
 
 
 
-    cpudata_in <= romdata_out when nROM = '0' else
-                 ramdata_out when nWRAM ='0' else
-                 ramdata_out when nVRAM ='0' else
-                 x"ff" when nDIPSW ='0' else
-                 x"ff";
+    cpudata_in <= romdata_out               when nROM  = '0' else
+                  ramdata_out               when nWRAM  ='0' else
+                  ramdata_out               when nVRAM  ='0' else
+                  dipsw_q & "0000000"       when nDIPSW ='0' else
+                  in1_q   & "0000000"       when nIN1   ='0' else
+                  in0_q   & "0000000"       when nIN0   ='0' else
+                  x"ff";
 
 
 
 
     nWRAM0_VA <= '1' when (rom_addr_static(11 downto 4) = "00000000") else
-                '0';
+                 '0';
     nVRAM_VA  <= '1' when (rom_addr_static(11 downto 10) = "10")      else
-                '0';
+                 '0';
 
     tile_to_display <= ramVdata_out when (nWRAM0_VA ='1' or nVRAM_VA  = '1' )else
-                        x"FF";
+                       x"FF";
 
 
 
     D4_1_y <= '0' when (A(10)='1') and (A(11)='1' and C4_6 ='0') else
-                '1';
+ '1';
 
 
     ic74ls42_4f :component LS7442
@@ -317,22 +331,22 @@ begin
         );
 
 
-F4_o9   <= ic74ls42_4f_dout(9);
-F4_o8   <= ic74ls42_4f_dout(8);
-nDIPSW  <= ic74ls42_4f_dout(7);
-F4_o6   <= ic74ls42_4f_dout(6);
-nIN1    <= ic74ls42_4f_dout(5);
-nIN0    <= ic74ls42_4f_dout(4);
-nWDR    <= ic74ls42_4f_dout(3);
-nINTACK <= ic74ls42_4f_dout(2);
-nOUT1   <= ic74ls42_4f_dout(1);
-nOUT0   <= ic74ls42_4f_dout(0);
+    F4_o9   <= ic74ls42_4f_dout(9);
+    F4_o8   <= ic74ls42_4f_dout(8);
+    nDIPSW  <= ic74ls42_4f_dout(7);
+    F4_o6   <= ic74ls42_4f_dout(6);
+    nIN1    <= ic74ls42_4f_dout(5);
+    nIN0    <= ic74ls42_4f_dout(4);
+    nWDR    <= ic74ls42_4f_dout(3);
+    nINTACK <= ic74ls42_4f_dout(2);-- nand not( not(A(0)) and not(A(1)) and not(A(2)));
+    nOUT1   <= ic74ls42_4f_dout(1);
+    nOUT0   <= ic74ls42_4f_dout(0);
 
 
 
 
 
-    BULLET_RENDER:  component BulletRender 
+    BULLET_RENDER:  component BulletRender
         Port map(
             clk              =>  clock ,
             clk_32M          =>  i_clock32M ,
@@ -346,6 +360,41 @@ nOUT0   <= ic74ls42_4f_dout(0);
             clear_count      =>  y1,
             data_out         =>  bullet_out
         );
+
+
+
+    LOGIC_OUTPUTS1: component  LS74259
+        Port MAP(
+            clr_n         => not(i_reset),
+            d             => cpudata_out(0),
+            we_n          => nOUT1,
+            add           => A(2 downto 0),
+            dout          => outputs1
+        );
+    nmi_n <= outputs1(7);
+
+
+    DIPSW_INPUT : component LS74251
+        Port map(
+            q            => dipsw_q,
+            we_n         => nDIPSW,
+            add          => A(2 downto 0),
+            din          => "11111001" -- x"01"
+        );
+    IN1_INPUT : component LS74251 
+    Port map(
+        q            => in1_q ,
+        we_n         => nIN1,
+        add          => A(2 downto 0) ,
+        din          => test_sw & '1' & pl_start & "11111"
+    );
+    IN0_INPUT : component LS74251 
+    Port map(
+        q            => in0_q ,
+        we_n         => nIN0,
+        add          => A(2 downto 0),
+        din          => serv_sw & '1' & coin_sw1 & i_shoot & i_right & i_down  & i_left & i_up
+    );
 
 
 end Behavioral;

@@ -147,8 +147,8 @@ begin
             pr_n   => '1',
             clk    => v16,
             d      => not(v128 and v64 and v32),
-            q      => vblank,
-            q_n    => open
+            q      => open,
+            q_n    => vblank
         );
         
     ic74ls74_5F_2: component LS7474

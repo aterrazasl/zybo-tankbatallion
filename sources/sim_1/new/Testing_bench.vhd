@@ -1,9 +1,6 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 
 
@@ -13,22 +10,15 @@ end Testing_bench;
 
 architecture Behavioral of Testing_bench is
 
-    use work.tank_batallion_defs.all; --.LS74161;
+    use work.tank_batallion_defs.all; 
 
-    signal clock, clock_32M : std_logic;
-    signal data_count, data_count2 : std_logic_vector (7 downto 0);
-    signal i_reset, i_enable, i_load :std_logic ;
-
-    signal h256, compsync, vblank : std_logic ;
-
+    signal clock, clock_32M, i_reset : std_logic;
     signal VGA_out : VGA_output_ports;
-
-
 
 begin
 
     ---- Clock Generation
-    GENERATE_CLOCKCK: process
+    GENERATE_CLOCK6M: process
     begin
         wait for (ClockPeriod_6M / 2);
         clock <= '1';
@@ -48,19 +38,8 @@ begin
     RESET_PROCESS: process
     begin
         i_reset   <= '1';
-        i_enable <= '1';
         wait for 1000 ns;
         i_reset <= '0';
-        wait;
-    end process;
-
-    LOAD_PROCESS: process
-    begin
-        i_load<= '1';
-        wait for 1800 ns;
-        i_load<= '0';
-        wait for 4 * (ClockPeriod_6M / 2);
-        i_load<= '1';
         wait;
     end process;
 
@@ -71,7 +50,15 @@ begin
             i_clock     => clock,
             i_clock32M  => clock_32M,
             VGAports    => VGA_out,
-            fixed_tile  => "000"
+            pl_start    => '1',
+            coin_sw1    => '1',
+            test_sw     => '1',
+            serv_sw     => '1',
+            i_up        => '1',
+            i_down      => '1',
+            i_left      => '1',
+            i_right     => '1',
+            i_shoot     => '1'
         );
 
 
