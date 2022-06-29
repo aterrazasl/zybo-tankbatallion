@@ -56,14 +56,16 @@ architecture Behavioral of TankBatallion_top is
     signal dipsw_q, in1_q, in0_q : std_logic ;
 
     signal per_map : PERIPHERAL_MAP;
+    signal i_reset_n : std_logic;
 begin
 
+    i_reset_n <= not(i_reset);
     ---- Timing sync generation    ---- 
 
     TimingSync_Module: component TimingSync
         Port map (
             clk           => i_clock,
-            clr_n         => not (i_reset),
+            clr_n         => i_reset_n,
             hsync         => h256,
             vsync         => vsync,
             compsync      => compsync,
@@ -96,7 +98,7 @@ begin
 
     ic74ls166_4D : component LS74166
         Port map(
-            clr_n           => not (i_reset),
+            clr_n           => i_reset_n,
             clk             => i_clock,
             clk_dis         => '0',
             serial          => '0',
@@ -117,7 +119,7 @@ begin
 
     ic74ls174_3J : component LS74174
         Port map(
-            clr_n   => not(i_reset ),
+            clr_n   => i_reset_n,
             clk     => i_clock, --i_clock32M,
             d       => tile(7 downto 2), --"110011",
             q       => ic74ls174_3J_1_q,
@@ -140,36 +142,42 @@ begin
 
 
 
-    ic_static_frame_mux_1 : component  LS74157
-        Port map(
-            sel          => '1',
-            en_n         => '1' and  (h256_out) ,
-            d0           => "0000",
-            d1           => '1' & '0' & data_count2(6) & data_count2(5),
-            z            => rom_addr_static (11 downto 8)
-        );
+    --    ic_static_frame_mux_1 : component  LS74157
+    --        Port map(
+    --            sel          => '1',
+    --            en_n         => '1' and  (h256_out) ,
+    --            d0           => "0000",
+    --            d1           => '1' & '0' & data_count2(6) & data_count2(5),
+    --            z            => rom_addr_static (11 downto 8)
+    --        );
 
-    ic_static_frame_mux_2 : component  LS74157
-        Port map(
-            sel          => '1',
-            en_n         => '1' and  (h256_out) ,
-            d0           => "0000",
-            d1           => data_count2(4) & data_count2(3) &  data_count2(2) & data_count(6),
-            z            => rom_addr_static (7 downto 4)
-        );
+    --    ic_static_frame_mux_2 : component  LS74157
+    --        Port map(
+    --            sel          => '1',
+    --            en_n         => '1' and  (h256_out) ,
+    --            d0           => "0000",
+    --            d1           => data_count2(4) & data_count2(3) &  data_count2(2) & data_count(6),
+    --            z            => rom_addr_static (7 downto 4)
+    --        );
 
-    ic_static_frame_mux_3 : component  LS74157
-        Port map(
-            sel          => '1',
-            en_n         => '0'  ,
-            d0           => "0000",
-            d1           => data_count(5) & data_count(4) & data_count(3) & data_count(2),
-            z            => rom_addr_static (3 downto 0)
-        );
+    --    ic_static_frame_mux_3 : component  LS74157
+    --        Port map(
+    --            sel          => '1',
+    --            en_n         => '0'  ,
+    --            d0           => "0000",
+    --            d1           => data_count(5) & data_count(4) & data_count(3) & data_count(2),
+    --            z            => rom_addr_static (3 downto 0)
+    --        );
+
+
+    -- Video address mapping --
+    rom_addr_static <=   '1' & '0' & data_count2(6) & data_count2(5) &  data_count2(4) & data_count2(3) &  data_count2(2) & data_count(6)& data_count(5) & data_count(4) & data_count(3) & data_count(2);
+
+
 
     ic74ls274_2L: component LS74273
         Port map(
-            clr_n   => not(i_reset ),
+            clr_n   => i_reset_n,
             clk     => data_count(1),  --h4
             d       => tile_to_display,
             q       => tile ,
@@ -180,7 +188,7 @@ begin
     CPU_CLOCK_MOD : component cpu_clock
         Port map (
             clk         => i_clock32M,
-            rst_n       => not(i_reset),
+            rst_n       => i_reset_n,
             Phi2        => data_count(1) ,
             cpu_clken   => cpu_clken
         );
@@ -189,7 +197,7 @@ begin
         Port map (
             clk             => i_clock32M,
             enable          => cpu_clken,
-            rst_n           => not(i_reset),
+            rst_n           => i_reset_n,
             ab              => A,
             dbi             => cpudata_in,
             dbo             => cpudata_out,
@@ -203,12 +211,12 @@ begin
     nROM <= not (A(13));
 
     cpudata_in <= romdata_out               when nROM  = '0' else
-                 ramdata_out               when per_map.nWRAM  ='0' else
-                 ramdata_out               when per_map.nVRAM  ='0' else
-                 dipsw_q & "0000000"       when per_map.nDIPSW ='0' else
-                 in1_q   & "0000000"       when per_map.nIN1   ='0' else
-                 in0_q   & "0000000"       when per_map.nIN0   ='0' else
-                 x"ff";
+ ramdata_out               when per_map.nWRAM  ='0' else
+ ramdata_out               when per_map.nVRAM  ='0' else
+ dipsw_q & "0000000"       when per_map.nDIPSW ='0' else
+ in1_q   & "0000000"       when per_map.nIN1   ='0' else
+ in0_q   & "0000000"       when per_map.nIN0   ='0' else
+ x"ff";
 
     PROGRAM_MEMORY : component M2716_rom
         port map(
@@ -244,69 +252,15 @@ begin
             rom_addr_static  => rom_addr_static,
             per_map          => per_map
         );
-        
-        tile_to_display <= ramVdata_out when (per_map.nWRAM0_VA ='1' or per_map.nVRAM_VA  = '1' )else
-                           x"FF";
 
-    --    C3_2_y <= '0' when ((A(13)='0') and (r_w ='1')) else '1';
-    --    E4_3   <= nROM nand hCount(1);
-    --    C4_6   <=  E4_3 and C3_2_y;  --not(nROM)
-
-    --    nWRAM <= '0' when (A(10)='0' and A(11) ='0' and C4_6 ='0') else
-    --             '0' when (A(10)='1' and A(11) ='0' and C4_6 ='0') else
-    --             '1';
-
-    --    nVRAM <= '0' when (A(10)='0' and A(11) ='1' and C4_6 ='0') else
-    --             '1';
-
-    --    nWO   <= '0' when ((A(13)='0') and (r_w ='0')) else '1';
-
-    --    nWRAM0_VA <= '1' when (rom_addr_static(11 downto 4) = "00000000") else
-    --                 '0';
-    --    nVRAM_VA  <= '1' when (rom_addr_static(11 downto 10) = "10")      else
-    --                 '0';
-
-    --    tile_to_display <= ramVdata_out when (nWRAM0_VA ='1' or nVRAM_VA  = '1' )else
-    --                       x"FF";
-
-
-
-    --    D4_1_y <= '0' when (A(10)='1') and (A(11)='1' and C4_6 ='0') else
-    --            '1';
-
-
-    --    ic74ls42_4f :component LS7442
-    --        Port map (
-    --            din  => D4_1_y & nWO & A(4) & A(3),
-    --            dout => ic74ls42_4f_dout
-    --        );
-
-
-    --    F4_o9   <= ic74ls42_4f_dout(9);
-    --    F4_o8   <= ic74ls42_4f_dout(8);
-    --    nDIPSW  <= ic74ls42_4f_dout(7);
-    --    F4_o6   <= ic74ls42_4f_dout(6);
-    --    nIN1    <= ic74ls42_4f_dout(5);
-    --    nIN0    <= ic74ls42_4f_dout(4);
-    --    nWDR    <= ic74ls42_4f_dout(3);
-    --    nINTACK <= ic74ls42_4f_dout(2);-- nand not( not(A(0)) and not(A(1)) and not(A(2)));
-    --    nOUT1   <= ic74ls42_4f_dout(1);
-    --    nOUT0   <= ic74ls42_4f_dout(0);
-
-    --    per_map.nVRAM  <= nVRAM;
-    --    per_map.nWRAM  <= nWRAM;
-    --    per_map.nDIPSW <= nDIPSW;
-    --    per_map.nIN0   <= nIN0;
-    --    per_map.nIN1   <= nIN1;
-    --    per_map.nOUT0  <= nOUT0;
-    --    per_map.nOUT1  <= nOUT1;
+    tile_to_display <= ramVdata_out when (per_map.nWRAM0_VA ='1' or per_map.nVRAM_VA  = '1' )else x"FF";
 
     -- Renders bullet --
     BULLET_RENDER:  component BulletRender
         Port map(
             clk              =>  i_clock ,
             clk_32M          =>  i_clock32M ,
-            clr_n            =>  not (i_reset),
+            clr_n            =>  i_reset_n,
             hCount           =>  hCount ,
             vCount           =>  vCount,
             h256_out         =>  h256_out ,
