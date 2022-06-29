@@ -7,7 +7,7 @@ use work.tank_batallion_defs.all;
 entity TankBatallion_VGA_Top is
     port (
         i_clock      : in  std_logic;   -- 125Mhz input clock from L16
-        controls_SW  : in Zybo_CONTROLS;
+        controls_SW  : in  Zybo_CONTROLS;
         VGAports     : out Zybo_VGA_output_ports
     );
 end TankBatallion_VGA_Top;
@@ -24,7 +24,7 @@ begin
 
     -- dip switches default values --
     dip_SW.num_tanks <= '1';
-    dip_SW.bonus	 <= "11";
+    dip_SW.bonus	 <= "00";
     dip_SW.game_fee  <= "11";
 
     -- Clock generation 6Mhz and arlet_6502--

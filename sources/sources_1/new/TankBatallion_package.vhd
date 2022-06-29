@@ -43,13 +43,21 @@ package tank_batallion_defs is
         test_switch     : std_logic;
     end record;
 
+    type PERIPHERAL_MAP is record
+        nVRAM     : std_logic;
+        nWRAM	  : std_logic;
+        nDIPSW    : std_logic;
+        nIN0      : std_logic;
+        nIN1      : std_logic;
+        nOUT0     : std_logic;
+        nOUT1     : std_logic;
+    end record;
 
     component ResetGenerator is
         Port ( clock : in std_logic;
              reset : out std_logic
             );
     end component ResetGenerator;
-
 
     component signal_inverter is
         Port (
@@ -59,6 +67,22 @@ package tank_batallion_defs is
             dip_switch_n   : out  Zybo_DIP_SWITCH
         );
     end component signal_inverter;
+
+    component peripheral_control is
+        Port (
+            i_reset      : in  std_logic;
+            A            : in  std_logic_vector(2 downto 0);
+            controls     : in  Zybo_CONTROLS;
+            dip_switch   : in  Zybo_DIP_SWITCH;
+            per_map      : in  PERIPHERAL_MAP;
+            nmi_n        : out std_logic;
+            cpudata_in   : in std_logic;
+            dipsw_q      : out std_logic;
+            in1_q        : out std_logic;
+            in0_q        : out std_logic
+        );
+    end component peripheral_control;
+
 
     component LS74161
         port (

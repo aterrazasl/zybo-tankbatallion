@@ -57,9 +57,11 @@ architecture Behavioral of TankBatallion_top is
     signal vCount, hCount : std_logic_vector (8 downto 0);
     signal bullet_out : std_logic ;
     signal nmi_n : std_logic ;
-    signal outputs1 :std_logic_vector (7 downto 0);
+    signal outputs1 :std_logic_vector (7 downto 0); -- deleteme
     
     signal dipsw_q, in1_q, in0_q : std_logic ;
+    
+    signal per_map : PERIPHERAL_MAP;
 begin
 
     ---- Timing sync generation    ---- 
@@ -88,19 +90,6 @@ begin
     VGAports.v_sync  <= vsync;
 
 
-
-    --    TEST_PATTERN :block
-    --    begin
-    --        red      <= data_count(3) and data_count2(3) and (data_count(7)) and vblank ;
-    --        green    <= data_count(2) and data_count2(2) and (data_count(7)) and vblank ;
-    --        blue     <= data_count(4) and data_count2(4) and (data_count(7)) and vblank ;
-    --        VGAports.red    <= red & red & red & red & red;
-    --        VGAports.green  <= green & green & green & green & green & green;
-    --        VGAports.blue   <= blue & blue & blue  & blue  & blue;
-
-    --    end block TEST_PATTERN;
-
-
     ic74ls139_4D : component LS74139
         Port map(
             oe_n   =>  not(data_count(1) and data_count(0) and h1),
@@ -122,10 +111,7 @@ begin
             qh              => ic74ls166_4D_1_qh
         );
 
-
-
-
-    ROM2716 : component  M2716
+    CHARACTER_ROM_2716_2K : component  M2716
         port map (
             clk    => i_clock32M,
             oe_n   => '0',
@@ -144,7 +130,7 @@ begin
             enable  =>y0 and y1
         );
 
-    ic7052_3L : component IC7052
+    COLOR_ROM_ic7052_3L : component IC7052
         port map(
             clk     => i_clock32M,
             oe_n    => vblank,
@@ -187,9 +173,7 @@ begin
             z            => rom_addr_static (3 downto 0)
         );
 
-
-
-    icStatic_frame: component LS74273
+    ic74ls274_2L: component LS74273
         Port map(
             clr_n   => not(i_reset ),
             clk     => data_count(1),  --h4
@@ -198,19 +182,7 @@ begin
             enable  => '1'
         );
 
-
-    --    isM2716_static : component  M2716_static_frame
-    --        port map(
-    --            clk    => i_clock32M,
-    --            oe_n   => '0' ,
-    --            ce_n   => '0',
-    --            addr   => rom_addr_static(10 downto 0),
-    --            data   => tile_to_display
-    --        );
-
-
-
-
+    -- CPU 6502 module --
     CPU_CLOCK_MOD : component cpu_clock
         Port map (
             clk         => i_clock32M,
@@ -218,7 +190,6 @@ begin
             Phi2        => data_count(1) ,
             cpu_clken   => cpu_clken
         );
-
 
     CPU_6502 : component  arlet_6502
         Port map (
@@ -237,7 +208,7 @@ begin
 
     nROM <= not (A(13));
 
-    ROM_MEMORY : component M2716_rom
+    PROGRAM_MEMORY : component M2716_rom
         port map(
             clk    => i_clock32M,
             oe_n   => nROM,
@@ -305,8 +276,8 @@ begin
 
     ic74ls42_4f :component LS7442
         Port map (
-            din           => D4_1_y & nWO & A(4) & A(3),
-            dout          => ic74ls42_4f_dout
+            din  => D4_1_y & nWO & A(4) & A(3),
+            dout => ic74ls42_4f_dout
         );
 
 
@@ -321,8 +292,13 @@ begin
     nOUT1   <= ic74ls42_4f_dout(1);
     nOUT0   <= ic74ls42_4f_dout(0);
 
-
-
+    per_map.nVRAM  <= nVRAM;
+    per_map.nWRAM  <= nWRAM;
+    per_map.nDIPSW <= nDIPSW;
+    per_map.nIN0   <= nIN0;
+    per_map.nIN1   <= nIN1;
+    per_map.nOUT0  <= nOUT0;
+    per_map.nOUT1  <= nOUT1;
 
 
     BULLET_RENDER:  component BulletRender
@@ -341,40 +317,55 @@ begin
         );
 
 
-
-    LOGIC_OUTPUTS1: component  LS74259
-        Port MAP(
-            clr_n         => not(i_reset),
-            d             => cpudata_out(0),
-            we_n          => nOUT1,
-            add           => A(2 downto 0),
-            dout          => outputs1
-        );
-    nmi_n <= outputs1(7);
-
-
-    DIPSW_INPUT : component LS74251
+    PERIPHERAL_LOGIC : component peripheral_control
         Port map(
-            q            => dipsw_q,
-            we_n         => nDIPSW,
-            add          => A(2 downto 0),
-            din          => "11" & dip_switch.num_tanks &  dip_switch.bonus & dip_switch.game_fee & '1' --"11111001" -- x"01"
+            i_reset      => i_reset,
+            A            => A(2 downto 0),
+            controls     => controls,
+            dip_switch   => dip_switch,
+            per_map      => per_map,
+            nmi_n        => nmi_n,
+            cpudata_in   => cpudata_out(0),
+            dipsw_q      => dipsw_q,
+            in1_q        => in1_q,
+            in0_q        => in0_q
         );
+
+
+
+--    LOGIC_OUTPUTS1: component  LS74259
+--        Port MAP(
+--            clr_n         => not(i_reset),
+--            d             => cpudata_out(0),
+--            we_n          => nOUT1,
+--            add           => A(2 downto 0),
+--            dout          => outputs1
+--        );
+--    nmi_n <= outputs1(7);
+
+
+--    DIPSW_INPUT : component LS74251
+--        Port map(
+--            q            => dipsw_q,
+--            we_n         => nDIPSW,
+--            add          => A(2 downto 0),
+--            din          => "11" & dip_switch.num_tanks &  dip_switch.bonus & dip_switch.game_fee & '1' --"11111001" -- x"01"
+--        );
         
-    IN1_INPUT : component LS74251 
-    Port map(
-        q            => in1_q ,
-        we_n         => nIN1,
-        add          => A(2 downto 0) ,
-        din          => controls.test_switch & '1' & controls.player1_start & "11111"
-    );
-    IN0_INPUT : component LS74251 
-    Port map(
-        q            => in0_q ,
-        we_n         => nIN0,
-        add          => A(2 downto 0),
-        din          => '1' & '1' & controls.coin_switch & controls.shoot & controls.right & controls.down  & controls.left & controls.up
-    );
+--    IN1_INPUT : component LS74251 
+--    Port map(
+--        q            => in1_q ,
+--        we_n         => nIN1,
+--        add          => A(2 downto 0) ,
+--        din          => controls.test_switch & '1' & controls.player1_start & "11111"
+--    );
+--    IN0_INPUT : component LS74251 
+--    Port map(
+--        q            => in0_q ,
+--        we_n         => nIN0,
+--        add          => A(2 downto 0),
+--        din          => '1' & '1' & controls.coin_switch & controls.shoot & controls.right & controls.down  & controls.left & controls.up
+--    );
 
 
 end Behavioral;
