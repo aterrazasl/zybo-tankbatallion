@@ -378,7 +378,7 @@ begin
     dout <= q7 & q6 & q5 & q4 & q3 & q2 & q1 & q0;--  when clr_n ='0' else x"00";
 
 
-    process (we_n, clr_n)
+    process (add,d,q0,q1,q2,q3,q4,q5,q6,q7,we_n, clr_n)
     begin
         if (clr_n = '0') then
             q0 <= '0';

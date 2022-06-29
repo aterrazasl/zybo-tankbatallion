@@ -44,6 +44,9 @@ package tank_batallion_defs is
     end record;
 
     type PERIPHERAL_MAP is record
+        nWO       : std_logic;
+        nWRAM0_VA : std_logic;
+        nVRAM_VA  : std_logic;
         nVRAM     : std_logic;
         nWRAM	  : std_logic;
         nDIPSW    : std_logic;
@@ -51,12 +54,18 @@ package tank_batallion_defs is
         nIN1      : std_logic;
         nOUT0     : std_logic;
         nOUT1     : std_logic;
+        nWDR      : std_logic;
+        nINTACK   : std_logic;
+        F4_o9     : std_logic; -- not used
+        F4_o8     : std_logic; -- not used
+        F4_o6     : std_logic; -- not used
     end record;
 
     component ResetGenerator is
-        Port ( clock : in std_logic;
-             reset : out std_logic
-            );
+        Port (
+            clock : in std_logic;
+            reset : out std_logic
+        );
     end component ResetGenerator;
 
     component signal_inverter is
@@ -83,6 +92,16 @@ package tank_batallion_defs is
         );
     end component peripheral_control;
 
+    component address_decoder is
+        Port (
+            cpu_r_w         : in std_logic;
+            A               : in std_logic_vector (15 downto 0);
+            nROM            : in std_logic ;
+            h2              : in std_logic;
+            rom_addr_static : in std_logic_vector (11 downto 0);
+            per_map         : out  PERIPHERAL_MAP
+        );
+    end component address_decoder;
 
     component LS74161
         port (

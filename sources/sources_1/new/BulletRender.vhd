@@ -30,6 +30,9 @@ architecture Behavioral of BulletRender is
 
     signal zigma, address : std_logic_vector (7 downto 0);
     signal f3_out, e4_out , e5_out, c5_out, e3_q_n_out, d2_out : std_logic ;
+    signal addr : std_logic_vector(9 downto 0);
+    signal h256_ast_out_n : std_logic;
+    signal clk_n : std_logic;
 
 begin
 
@@ -76,22 +79,23 @@ begin
             clk    => clk_32M,
             we     => clk ,
             en     => c5_out,
-            addr   => '0' & '0' & address,
+            addr   => addr, --'0' & '0' & address,
             di     => h256_ast_out,
             do     => d2_out
         );
-
+    addr <= '0' & '0' & address;
 
     ic74ls74_3E_2: component LS7474
         Port map (
-            clr_n  => not(h256_ast_out),
+            clr_n  => h256_ast_out_n,
             pr_n   => '1',
-            clk    => not(clk),
+            clk    => clk_n,
             d      => d2_out,
             q      => data_out,
             q_n    => open
         );
-
+    h256_ast_out_n <= not(h256_ast_out);
+    clk_n <= not(clk);
 
 
 
