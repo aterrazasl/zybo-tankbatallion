@@ -23,9 +23,9 @@ architecture Behavioral of TankBatallion_VGA_Top is
 begin
 
     -- dip switches default values --
-    dip_SW.num_tanks <= '0';
+    dip_SW.num_tanks <= '1';
     dip_SW.bonus	 <= "00";
-    dip_SW.game_fee  <= "00";
+    dip_SW.game_fee  <= "11";
 
     -- Clock generation 6Mhz and arlet_6502--
     -- 6Mhz is used in the tank batallion and 32Mhz for scandoubler --
