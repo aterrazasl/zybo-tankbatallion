@@ -10,10 +10,10 @@ create_clock -period 8.000 -name sys_clk_pin -waveform {0.000 4.000} -add [get_p
 
 
 ##Switches
-set_property -dict {PACKAGE_PIN G15 IOSTANDARD LVCMOS33} [get_ports i_switch_0]
-set_property -dict {PACKAGE_PIN P15 IOSTANDARD LVCMOS33} [get_ports i_switch_1]
-set_property -dict {PACKAGE_PIN W13 IOSTANDARD LVCMOS33} [get_ports i_switch_2]
-set_property -dict {PACKAGE_PIN T16 IOSTANDARD LVCMOS33} [get_ports i_switch_3]; #{ sw[3] }]; #IO_L9P_T1_DQS_34 Sch=sw[3]
+set_property -dict {PACKAGE_PIN G15 IOSTANDARD LVCMOS33} [get_ports {controls_SW[shoot]}]
+set_property -dict {PACKAGE_PIN P15 IOSTANDARD LVCMOS33} [get_ports {controls_SW[player1_start]}]
+set_property -dict {PACKAGE_PIN W13 IOSTANDARD LVCMOS33} [get_ports {controls_SW[coin_switch]}]
+set_property -dict {PACKAGE_PIN T16 IOSTANDARD LVCMOS33} [get_ports {controls_SW[test_switch]}]; #{ sw[3] }]; #IO_L9P_T1_DQS_34 Sch=sw[3]
 
 
 ##Buttons
@@ -24,7 +24,7 @@ set_property -dict {PACKAGE_PIN T16 IOSTANDARD LVCMOS33} [get_ports i_switch_3];
 
 
 ##LEDs
-set_property -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS33} [get_ports o_led_drive]
+#set_property -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS33} [get_ports o_led_drive]
 #set_property -dict { PACKAGE_PIN M15   IOSTANDARD LVCMOS33 } [get_ports { led[1] }]; #IO_L23N_T3_35 Sch=led[1]
 #set_property -dict { PACKAGE_PIN G14   IOSTANDARD LVCMOS33 } [get_ports { led[2] }]; #IO_0_35 Sch=led[2]
 #set_property -dict { PACKAGE_PIN D18   IOSTANDARD LVCMOS33 } [get_ports { led[3] }]; #IO_L3N_T0_DQS_AD1N_35 Sch=led[3]
@@ -195,19 +195,26 @@ set_property -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS33} [get_ports o_led_drive]
 #set_property PACKAGE_PIN W9 [get_ports {netic19_w9}]; #IO_L16N_T2_13
 #set_property PACKAGE_PIN Y9 [get_ports {netic19_y9}]; #IO_L14P_T2_SRCC_13
 
-set_property PACKAGE_PIN E17 [get_ports clock_enable]
-set_property IOSTANDARD LVCMOS33 [get_ports clock_enable]
+#set_property PACKAGE_PIN E17 [get_ports clock_enable]
+#set_property IOSTANDARD LVCMOS33 [get_ports clock_enable]
 
 
 
-set_property PACKAGE_PIN R18 [get_ports i_reset]
-set_property IOSTANDARD LVCMOS33 [get_ports i_reset]
+set_property PACKAGE_PIN R18 [get_ports {controls_SW[right]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {controls_SW[right]}]
+set_property PACKAGE_PIN P16 [get_ports {controls_SW[down]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {controls_SW[down]}]
+set_property PACKAGE_PIN V16 [get_ports {controls_SW[up]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {controls_SW[up]}]
+set_property PACKAGE_PIN Y16 [get_ports {controls_SW[left]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {controls_SW[left]}]
 
 
-set_property PACKAGE_PIN M15 [get_ports led1]
-set_property PACKAGE_PIN G14 [get_ports led2]
-set_property IOSTANDARD LVCMOS33 [get_ports led1]
-set_property IOSTANDARD LVCMOS33 [get_ports led2]
+
+#set_property PACKAGE_PIN M15 [get_ports led1]
+#set_property PACKAGE_PIN G14 [get_ports led2]
+#set_property IOSTANDARD LVCMOS33 [get_ports led1]
+#set_property IOSTANDARD LVCMOS33 [get_ports led2]
 
 
 set_property PACKAGE_PIN P19 [get_ports {VGAports[h_sync]}]

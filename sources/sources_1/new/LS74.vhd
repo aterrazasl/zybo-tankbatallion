@@ -71,23 +71,34 @@ entity LS7474 is
 end LS7474;
 
 architecture Behavioral of LS7474 is
-    signal q_temp : std_logic;
 begin
 
-    q   <=     q_temp;
-    q_n <= not(q_temp);
-
-    process (clk,clr_n, pr_n )
+    process (clk, pr_n, clr_n )
     begin
-        if (clr_n ='0') then
-            q_temp <= '0';
-        elsif (pr_n = '0') then
-            q_temp <= '1';
+
+
+        --        if (clr_n ='0') then
+        --            q_temp <= '0';
+        --        elsif (pr_n = '0') then
+        --            q_temp <= '1';
+        --        elsif (rising_edge (clk) ) then
+        --            q_temp <= d;
+        --        end if;
+
+        if (pr_n = '0') then
+            q  <= '1';
+            q_n <='0';
+        elsif (clr_n ='0') then
+            q  <= '0';
+            q_n <='1';
         elsif (rising_edge (clk) ) then
-            q_temp <= d;
+            q  <= d;
+            q_n <=not(d);
         end if;
+
     end process;
 end Behavioral;
+
 
 
 
@@ -298,3 +309,168 @@ end Behavioral;
 
 
 
+--Implementation of 74LS42
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS7442 is
+    Port (
+        din           :  in std_logic_vector(3 downto 0);
+        dout          :  out std_logic_vector(9 downto 0)
+    );
+end LS7442;
+
+architecture Behavioral of LS7442 is
+begin
+    with din select
+ dout <= "1111111110" when "0000",
+        "1111111101" when "0001",
+        "1111111011" when "0010",
+        "1111110111" when "0011",
+        "1111101111" when "0100",
+        "1111011111" when "0101",
+        "1110111111" when "0110",
+        "1101111111" when "0111",
+        "1011111111" when "1000",
+        "0111111111" when "1001",
+        "1111111111" when others;
+
+end Behavioral;
+
+
+
+
+
+
+--Implementation of 74LS259
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74259 is
+    Port (
+        clr_n         : in std_logic ;
+        d             : in std_logic ;
+        we_n          : in std_logic ;
+        add           :  in std_logic_vector(2 downto 0);
+        dout          :  out std_logic_vector(7 downto 0)
+    );
+end LS74259;
+
+architecture Behavioral of LS74259 is
+    signal dtemp :   std_logic_vector(7 downto 0);
+    signal q0,q1,q2,q3,q4,q5,q6,q7 : std_logic ;
+begin
+
+    dout <= q7 & q6 & q5 & q4 & q3 & q2 & q1 & q0;--  when clr_n ='0' else x"00";
+
+
+    process (add,d,q0,q1,q2,q3,q4,q5,q6,q7,we_n, clr_n)
+    begin
+        if (clr_n = '0') then
+            q0 <= '0';
+            q1 <= '0';
+            q2 <= '0';
+            q3 <= '0';
+            q4 <= '0';
+            q5 <= '0';
+            q6 <= '0';
+            q7 <= '0';
+        elsif (we_n ='0') then
+            case add is
+                when "000" =>
+                    q0 <= d;
+                when "001" =>
+                    q1 <= d;
+                when "010" =>
+                    q2 <= d;
+                when "011" =>
+                    q3 <= d;
+                when "100" =>
+                    q4 <= d;
+                when "101" =>
+                    q5 <= d;
+                when "110" =>
+                    q6 <= d;
+                when "111" =>
+                    q7 <= d;
+                when others =>
+                    q0 <= q0;
+                    q1 <= q1;
+                    q2 <= q2;
+                    q3 <= q3;
+                    q4 <= q4;
+                    q5 <= q5;
+                    q6 <= q6;
+                    q7 <= q7;
+            end case;
+        else
+            q0 <= q0;
+            q1 <= q1;
+            q2 <= q2;
+            q3 <= q3;
+            q4 <= q4;
+            q5 <= q5;
+            q6 <= q6;
+            q7 <= q7;
+
+        end if;
+    end process;
+
+end Behavioral;
+
+
+
+
+
+--Implementation of 74LS251
+--.
+--.
+--.
+--.
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+
+entity LS74251 is
+    Port (
+        q             : out std_logic ;
+        we_n          : in std_logic ;
+        add           :  in std_logic_vector(2 downto 0);
+        din           :  in std_logic_vector(7 downto 0)
+    );
+end LS74251;
+
+architecture Behavioral of LS74251 is
+    signal dtemp :   std_logic;
+begin
+
+    q <= dtemp when (we_n='0') else '0';
+
+    with add select
+ dtemp <= din(0) when "000",
+        din(1) when "001",
+        din(2) when "010",
+        din(3) when "011",
+        din(4) when "100",
+        din(5) when "101",
+        din(6) when "110",
+        din(7) when "111",
+        '0' when others;
+
+end Behavioral;

@@ -6,18 +6,22 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity TimingSync is
     Port (
-        clk       : in std_logic;
-        clr_n     : in std_logic;
-        hsync     : out std_logic;
-        vsync     : out std_logic;
-        compsync  : out std_logic;
-        vblank    : out std_logic;
-        h1_out    : out std_logic;
-        v1_out    : out std_logic;
-        h256_out    : out std_logic;
-        h256_ast_out    : out std_logic;
-        low_count : out std_logic_vector (7 downto 0);
-        high_count: out std_logic_vector (7 downto 0)
+        clk           : in std_logic;
+        clr_n         : in std_logic;
+        hsync         : out std_logic;
+        vsync         : out std_logic;
+        compsync      : out std_logic;
+        vblank        : out std_logic;
+        h1_out        : out std_logic;
+        v1_out        : out std_logic;
+        h256_out      : out std_logic;
+        h256_ast_out  : out std_logic;
+        low_count     : out std_logic_vector (7 downto 0);
+        high_count    : out std_logic_vector (7 downto 0);
+        nIRQ          : out std_logic;
+        nINTACK       : in std_logic;
+        v_out         : out std_logic_vector (8 downto 0);
+        h_out         : out std_logic_vector (8 downto 0)
     );
 end TimingSync;
 
@@ -38,6 +42,10 @@ architecture Behavioral of TimingSync is
 
 
 begin
+
+    v_out <= data_count2 & v1;
+    h_out <= data_count & h1;
+    
     h1_out<= h1;
     v1_out<= v1;
 
@@ -139,8 +147,18 @@ begin
             pr_n   => '1',
             clk    => v16,
             d      => not(v128 and v64 and v32),
-            q      => vblank,
-            q_n    => open
+            q      => open,
+            q_n    => vblank
         );
+        
+    ic74ls74_5F_2: component LS7474
+        Port map (
+            clr_n  => clr_n,
+            pr_n   => nINTACK,
+            clk    => v16,
+            d      => '0',
+            q      => nIRQ,
+            q_n    => open
+        );        
 
 end Behavioral;
