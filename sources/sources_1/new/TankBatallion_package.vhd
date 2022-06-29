@@ -26,12 +26,39 @@ package tank_batallion_defs is
         blue            : std_logic_vector (4 downto 0);
     end record;
 
+    type Zybo_DIP_SWITCH is record
+        num_tanks   	: std_logic;
+        bonus			: std_logic_vector (1 downto 0);
+        game_fee        : std_logic_vector (1 downto 0);
+    end record;
+
+    type Zybo_CONTROLS is record
+        up   	        : std_logic;
+        left	        : std_logic;
+        down            : std_logic;
+        right           : std_logic;
+        shoot           : std_logic;
+        player1_start   : std_logic;
+        coin_switch     : std_logic;
+        test_switch     : std_logic;
+    end record;
+
 
     component ResetGenerator is
         Port ( clock : in std_logic;
              reset : out std_logic
             );
     end component ResetGenerator;
+
+
+    component signal_inverter is
+        Port (
+            controls       : in   Zybo_CONTROLS;
+            dip_switch     : in   Zybo_DIP_SWITCH;
+            controls_n     : out  Zybo_CONTROLS;
+            dip_switch_n   : out  Zybo_DIP_SWITCH
+        );
+    end component signal_inverter;
 
     component LS74161
         port (
@@ -170,19 +197,12 @@ package tank_batallion_defs is
 
     component TankBatallion_top is
         port (
-            i_reset      : in std_logic ;
-            i_left       : in   std_logic;
-            i_right      : in   std_logic;
-            i_up         : in   std_logic;
-            i_down       : in   std_logic;
-            i_shoot      : in std_logic;
-            i_clock      : in  std_logic;   -- 125Mhz input clock from L16
-            i_clock32M   : in std_logic ;
-            VGAports     : out VGA_output_ports;
-            pl_start     : in std_logic ;
-            coin_sw1     : in std_logic ;
-            test_sw      : in std_logic ;
-            serv_sw      : in std_logic
+            i_reset      : in   std_logic;
+            i_clock      : in   std_logic;   -- 6Mhz input clock required
+            i_clock32M   : in   std_logic;
+            VGAports     : out  VGA_output_ports;
+            controls     : in   Zybo_CONTROLS;
+            dip_switch   : in   Zybo_DIP_SWITCH
         );
     end component TankBatallion_top;
 

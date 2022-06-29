@@ -6,26 +6,26 @@ use work.tank_batallion_defs.all;
 
 entity TankBatallion_VGA_Top is
     port (
-        i_left       : in  std_logic;
-        i_right      : in  std_logic;
-        i_up         : in  std_logic;
-        i_down       : in  std_logic;
         i_clock      : in  std_logic;   -- 125Mhz input clock from L16
-        i_switch_0   : in  std_logic;
-        i_switch_1   : in  std_logic;
-        i_switch_2   : in  std_logic;
-        i_switch_3   : in  std_logic ;
+        controls_SW  : in Zybo_CONTROLS;
         VGAports     : out Zybo_VGA_output_ports
     );
 end TankBatallion_VGA_Top;
 
 architecture Behavioral of TankBatallion_VGA_Top is
-
+    
     signal VGA_TB, VGA_SD : VGA_output_ports ;
+    signal controls_SW_n : Zybo_CONTROLS;
+    signal dip_SW, dip_SW_n : Zybo_DIP_SWITCH;
     signal clock_6, clock_32, reset_gen : std_logic ;
     signal enable_scandoubler : std_logic := '1';   -- 1 enables scandoubler, 0 uses the signals from the tank batallion game --
 
 begin
+
+    -- dip switches default values --
+    dip_SW.num_tanks <= '1';
+    dip_SW.bonus	 <= "11";
+    dip_SW.game_fee  <= "11";
 
     -- Clock generation 6Mhz and arlet_6502--
     -- 6Mhz is used in the tank batallion and 32Mhz for scandoubler --
@@ -43,6 +43,14 @@ begin
             reset => reset_gen
         );
 
+    INPUT_INVERTER : component signal_inverter
+        Port map(
+            controls        => controls_SW,
+            dip_switch      => dip_SW,
+            controls_n      => controls_SW_n,
+            dip_switch_n    => dip_SW_n
+        );
+
     -- Tank Batallion game core --
     TankBat : component TankBatallion_top
         port map (
@@ -50,15 +58,8 @@ begin
             i_clock     => clock_6,
             i_clock32M  => clock_32 ,
             VGAports    => VGA_TB,
-            pl_start    => not(i_switch_0),
-            coin_sw1    => not(i_switch_1),
-            test_sw     => not(i_switch_3),
-            serv_sw     => '1',
-            i_up        => not(i_up),
-            i_down      => not(i_down),
-            i_left      => not(i_left),
-            i_right     => not(i_right),
-            i_shoot     => not(i_switch_2)
+            controls    => controls_SW_n,
+            dip_switch  => dip_SW_n
         );
 
     -- Scandoubler generates signals for VGA --

@@ -8,18 +8,11 @@ use work.tank_batallion_defs.all;
 entity TankBatallion_top is
     port (
         i_reset      : in   std_logic;
-        i_left       : in   std_logic;
-        i_right      : in   std_logic;
-        i_up         : in   std_logic;
-        i_down       : in   std_logic;
-        i_shoot      : in   std_logic;
         i_clock      : in   std_logic;   -- 6Mhz input clock required
         i_clock32M   : in   std_logic;
         VGAports     : out  VGA_output_ports;
-        pl_start     : in   std_logic;
-        coin_sw1     : in   std_logic;
-        test_sw      : in   std_logic;
-        serv_sw      : in   std_logic 
+        controls     : in   Zybo_CONTROLS;
+        dip_switch   : in   Zybo_DIP_SWITCH
     );
 end TankBatallion_top;
 
@@ -365,21 +358,22 @@ begin
             q            => dipsw_q,
             we_n         => nDIPSW,
             add          => A(2 downto 0),
-            din          => "11111001" -- x"01"
+            din          => "11" & dip_switch.num_tanks &  dip_switch.bonus & dip_switch.game_fee & '1' --"11111001" -- x"01"
         );
+        
     IN1_INPUT : component LS74251 
     Port map(
         q            => in1_q ,
         we_n         => nIN1,
         add          => A(2 downto 0) ,
-        din          => test_sw & '1' & pl_start & "11111"
+        din          => controls.test_switch & '1' & controls.player1_start & "11111"
     );
     IN0_INPUT : component LS74251 
     Port map(
         q            => in0_q ,
         we_n         => nIN0,
         add          => A(2 downto 0),
-        din          => serv_sw & '1' & coin_sw1 & i_shoot & i_right & i_down  & i_left & i_up
+        din          => '1' & '1' & controls.coin_switch & controls.shoot & controls.right & controls.down  & controls.left & controls.up
     );
 
 
